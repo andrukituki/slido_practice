@@ -1,0 +1,1940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reinforcement Learning Master Quiz App</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --border: #334155;
+      --accent: #38bdf8;
+      --accent-hover: #0284c7;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --correct-bg: rgba(34, 197, 94, 0.15);
+      --correct-border: #22c55e;
+      --correct-text: #4ade80;
+      --wrong-bg: rgba(239, 68, 68, 0.15);
+      --wrong-border: #ef4444;
+      --wrong-text: #f87171;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.5;
+      padding: 24px 16px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      color: #ffffff;
+      margin-bottom: 6px;
+    }
+    header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+    .nav-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .btn-tab {
+      background: var(--card-bg);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-tab:hover {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+    .btn-tab.active {
+      background: var(--accent);
+      color: #0f172a;
+      border-color: var(--accent);
+      font-weight: 700;
+    }
+    .controls-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 18px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      font-size: 0.9rem;
+    }
+    .toggle-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .toggle-group label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .quiz-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+      margin-bottom: 24px;
+    }
+    .progress-bar-container {
+      width: 100%;
+      height: 6px;
+      background: var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .card-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .badge-module {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+      background: rgba(56, 189, 248, 0.12);
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+    .badge-type {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+    .question-title {
+      font-size: 1.18rem;
+      font-weight: 600;
+      line-height: 1.45;
+      margin-bottom: 20px;
+    }
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .option-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.4);
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s ease;
+    }
+    .option-item:hover {
+      border-color: var(--accent);
+      background: rgba(15, 23, 42, 0.8);
+    }
+    .option-item.selected {
+      border-color: var(--accent);
+      background: rgba(56, 189, 248, 0.15);
+    }
+    .option-item.correct {
+      border-color: var(--correct-border) !important;
+      background: var(--correct-bg) !important;
+    }
+    .option-item.wrong {
+      border-color: var(--wrong-border) !important;
+      background: var(--wrong-bg) !important;
+    }
+    .option-item.missed {
+      border: 1px dashed var(--correct-border) !important;
+      background: rgba(34, 197, 94, 0.08) !important;
+    }
+    .option-box {
+      margin-top: 2px;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--border);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+    }
+    .option-item.single .option-box {
+      border-radius: 50%;
+    }
+    .option-item.selected .option-box {
+      border-color: var(--accent);
+      background: var(--accent);
+    }
+    .option-item.selected .option-box::after {
+      content: "";
+      width: 6px;
+      height: 6px;
+      background: #0f172a;
+      border-radius: 2px;
+    }
+    .option-item.single.selected .option-box::after {
+      border-radius: 50%;
+    }
+    .option-content {
+      flex: 1;
+      font-size: 0.95rem;
+    }
+    .option-explanation {
+      margin-top: 6px;
+      font-size: 0.85rem;
+      line-height: 1.4;
+      display: none;
+    }
+    .option-item.correct .option-explanation {
+      display: block;
+      color: var(--correct-text);
+    }
+    .option-item.wrong .option-explanation {
+      display: block;
+      color: var(--wrong-text);
+    }
+    .option-item.missed .option-explanation {
+      display: block;
+      color: var(--correct-text);
+    }
+    .btn-action {
+      background: var(--accent);
+      color: #0f172a;
+      font-weight: 700;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .btn-action:hover {
+      background: var(--accent-hover);
+    }
+    .btn-action:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .btn-secondary:hover {
+      border-color: var(--text);
+      color: var(--text);
+    }
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+    }
+    .result-summary-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px 24px;
+      text-align: center;
+    }
+    .result-score {
+      font-size: 3rem;
+      font-weight: 800;
+      color: var(--accent);
+      margin: 12px 0;
+    }
+    .result-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Reinforcement Learning Quizzes</h1>
+      <p>Interactive practice for all course modules</p>
+    </header>
+
+    <div class="nav-bar" id="nav-tabs"></div>
+
+    <div class="controls-panel">
+      <div class="toggle-group">
+        <label>
+          <input type="checkbox" id="shuffle-toggle" /> Shuffle Questions
+        </label>
+        <label>
+          <input type="checkbox" id="exam-mode-toggle" /> Exam Mode (Instant Feedback Off)
+        </label>
+      </div>
+      <div>
+        <button class="btn-secondary" id="btn-review-missed" style="font-size: 0.8rem; padding: 6px 12px;">Practice Missed Only</button>
+      </div>
+    </div>
+
+    <div id="quiz-container"></div>
+  </div>
+
+  <script>
+    const QUIZ_DATA = [
+      // QUIZ 0
+      {
+        quizId: "0",
+        quizName: "Quiz 0: Foundations",
+        id: "q0_8",
+        question: "What distinguishes reinforcement learning from supervised learning?",
+        options: [
+          { text: "1. The agent receives labeled input-output pairs.", correct: false, explanation: "This is supervised learning: the training data already contains the target answer or label." },
+          { text: "2. The agent learns from a reward signal instead of explicit target labels.", correct: true, explanation: "In RL, the agent is not usually told the correct action. It learns from rewards, often delayed." },
+          { text: "3. The data distribution is always stationary.", correct: false, explanation: "The data distribution in RL often changes as the policy changes, because the agent visits different states and actions." },
+          { text: "4. The agent interacts with an environment.", correct: true, explanation: "RL is based on an agent-environment loop: observe a state, choose an action, receive reward and next state." }
+        ]
+      },
+      {
+        quizId: "0",
+        quizName: "Quiz 0: Foundations",
+        id: "q0_9",
+        question: "In the standard RL setting, what is a policy?",
+        options: [
+          { text: "1. A mapping from states to actions.", correct: true, explanation: "This is a deterministic policy: \\(\\pi(s) = a\\)." },
+          { text: "2. A mapping from rewards to states.", correct: false, explanation: "Rewards evaluate outcomes. They do not specify which action the agent should take." },
+          { text: "3. A function that predicts the next state.", correct: false, explanation: "That is a transition model or environment model, not a policy." },
+          { text: "4. A probability distribution over actions given a state.", correct: true, explanation: "This is a stochastic policy: \\(\\pi(a|s)\\)." }
+        ]
+      },
+      {
+        quizId: "0",
+        quizName: "Quiz 0: Foundations",
+        id: "q0_10",
+        question: "What does the return \\(G_t\\) typically represent?",
+        options: [
+          { text: "1. Immediate reward at time t.", correct: false, explanation: "That is only one reward. Return means accumulated future reward." },
+          { text: "2. Sum of discounted future rewards.", correct: true, explanation: "The usual discounted return is: \\(G_t = R_{t+1} + \\gamma R_{t+2} + \\gamma^2 R_{t+3} + \\dots\\)" },
+          { text: "3. The value of the optimal policy.", correct: false, explanation: "The optimal value is \\(V^*\\) or \\(Q^*\\); \\(G_t\\) is a sampled return along a trajectory." },
+          { text: "4. The gradient of the policy.", correct: false, explanation: "A policy gradient is used to update policy parameters. It is not the return." }
+        ]
+      },
+      {
+        quizId: "0",
+        quizName: "Quiz 0: Foundations",
+        id: "q0_11",
+        question: "What is the role of the discount factor \\(\\gamma\\)?",
+        options: [
+          { text: "1. Controls how much future rewards are weighted.", correct: true, explanation: "A smaller \\(\\gamma\\) makes the agent care more about near-term rewards. A larger \\(\\gamma\\) gives more weight to later rewards." },
+          { text: "2. Ensures convergence in infinite-horizon problems when \\(\\gamma < 1\\).", correct: true, explanation: "With bounded rewards and \\(\\gamma < 1\\) the infinite discounted return stays finite." },
+          { text: "3. Determines the learning rate.", correct: false, explanation: "The learning rate is usually \\(\\alpha\\). \\(\\gamma\\) is about future reward weighting." },
+          { text: "4. Defines the action space.", correct: false, explanation: "The action space is part of the environment or task definition." }
+        ]
+      },
+      {
+        quizId: "0",
+        quizName: "Quiz 0: Foundations",
+        id: "q0_12",
+        question: "What does the Markov property imply?",
+        options: [
+          { text: "1. The future depends only on the current state and action.", correct: true, explanation: "Given the current state and action, the full past history should not add extra predictive information." },
+          { text: "2. The process is deterministic.", correct: false, explanation: "A Markov process can be stochastic. Markov does not mean deterministic." },
+          { text: "3. The future depends on the entire history.", correct: false, explanation: "That is the opposite of the Markov property." },
+          { text: "4. The current state summarizes all relevant past information.", correct: true, explanation: "This is the core intuition: the state is a sufficient summary of the past." }
+        ]
+      },
+      {
+        quizId: "0",
+        quizName: "Quiz 0: Foundations",
+        id: "q0_13",
+        question: "What is the state-value function \\(V_\\pi(s)\\)?",
+        options: [
+          { text: "1. Expected return starting from state s and following policy \\(\\pi\\).", correct: true, explanation: "This is the definition: \\(V_\\pi(s) = \\mathbb{E}_\\pi[G_t | S_t = s]\\)." },
+          { text: "2. Maximum possible reward achievable from state s.", correct: false, explanation: "\\(V_\\pi(s)\\) is tied to a specific policy \\(\\pi\\). It is not simply the maximum possible immediate reward." },
+          { text: "3. Expected immediate reward in state s.", correct: false, explanation: "The state-value function includes future discounted rewards, not only the immediate reward." },
+          { text: "4. Probability of reaching a terminal state from s.", correct: false, explanation: "That is a different quantity unless the reward function is specially designed to encode terminal reachability." }
+        ]
+      },
+      {
+        quizId: "0",
+        quizName: "Quiz 0: Foundations",
+        id: "q0_14",
+        question: "Which algorithms are value-based methods?",
+        options: [
+          { text: "1. Q-learning", correct: true, explanation: "Q-learning learns an action-value function \\(Q(s,a)\\)." },
+          { text: "2. SARSA", correct: true, explanation: "SARSA also learns \\(Q(s,a)\\). It is value-based and on-policy." },
+          { text: "3. REINFORCE", correct: false, explanation: "REINFORCE is a policy-gradient method. It directly optimizes the policy rather than primarily learning a value function." }
+        ]
+      },
+      {
+        quizId: "0",
+        quizName: "Quiz 0: Foundations",
+        id: "q0_15",
+        question: "Which algorithms are on-policy methods?",
+        options: [
+          { text: "1. Q-learning", correct: false, explanation: "Q-learning is off-policy because its target uses the greedy next action \\(\\max_a Q(s', a)\\), even when the behavior policy explored." },
+          { text: "2. SARSA", correct: true, explanation: "SARSA is on-policy because it updates using the action actually taken by the current behavior policy: \\(Q(S_t, A_t) \\leftarrow Q(S_t, A_t) + \\alpha [R_{t+1} + \\gamma Q(S_{t+1}, A_{t+1}) - Q(S_t, A_t)]\\)." },
+          { text: "3. REINFORCE", correct: true, explanation: "REINFORCE learns from trajectories sampled from the current policy, so it is on-policy." }
+        ]
+      },
+      {
+        quizId: "0",
+        quizName: "Quiz 0: Foundations",
+        id: "q0_16",
+        question: "Which of the following can help reduce variance in policy gradient methods?",
+        options: [
+          { text: "1. A baseline function", correct: true, explanation: "A baseline can reduce variance without changing the expected policy gradient." },
+          { text: "2. A value function estimator", correct: true, explanation: "A learned \\(V(s)\\) is commonly used as the baseline." },
+          { text: "3. Increasing the discount factor above 1", correct: false, explanation: "\\(\\gamma > 1\\) is generally invalid and can make returns grow unboundedly instead of being discounted." },
+          { text: "4. Using advantage estimates", correct: true, explanation: "Advantage estimates compare an action to what was expected, which reduces variance: \\(A(s,a) = Q(s,a) - V(s)\\)." }
+        ]
+      },
+      {
+        quizId: "0",
+        quizName: "Quiz 0: Foundations",
+        id: "q0_17",
+        question: "In actor-critic methods, what are the roles of the actor and the critic?",
+        options: [
+          { text: "1. Actor selects actions via a policy.", correct: true, explanation: "The actor is the policy, for example \\(\\pi_\\theta(a | s)\\)." },
+          { text: "2. Actor computes the Bellman backup.", correct: false, explanation: "Bellman backups are mainly used to train value estimates, which belongs to the critic side." },
+          { text: "3. Critic estimates value functions.", correct: true, explanation: "The critic estimates \\(V(s)\\), \\(Q(s,a)\\), or advantage values." },
+          { text: "4. Critic defines the action space.", correct: false, explanation: "The action space is defined by the environment, not by the critic." }
+        ]
+      },
+
+      // QUIZ 1
+      {
+        quizId: "1",
+        quizName: "Quiz 1: Bandits & Intro",
+        id: "q1_1",
+        question: "What best describes reinforcement learning?",
+        options: [
+          { text: "Learning patterns in unlabeled data", correct: false, explanation: "That is unsupervised learning: finding structure without labeled targets." },
+          { text: "Learning to predict outputs from labeled examples", correct: false, explanation: "That is supervised learning: input examples come with target labels." },
+          { text: "Learning to make decisions through interaction with an environment", correct: true, explanation: "This is the core RL setting: an agent acts, receives feedback, and improves its decision making." },
+          { text: "Learning a fixed dataset without feedback", correct: false, explanation: "RL is not just passive learning from a fixed dataset; the agent receives feedback through rewards and affects data collection." }
+        ]
+      },
+      {
+        quizId: "1",
+        quizName: "Quiz 1: Bandits & Intro",
+        id: "q1_2",
+        question: "Which characteristics are typical for reinforcement learning?",
+        options: [
+          { text: "Labeled training targets", correct: false, explanation: "Explicit labels are typical of supervised learning, not RL." },
+          { text: "Delayed feedback", correct: true, explanation: "Actions may only show their usefulness after many later rewards." },
+          { text: "Sequential decision making", correct: true, explanation: "The current action affects later states, rewards, and choices." },
+          { text: "Active data collection", correct: true, explanation: "The agent chooses actions and thereby influences the data it collects." },
+          { text: "Independent samples", correct: false, explanation: "RL samples are usually correlated over time because they come from trajectories." }
+        ]
+      },
+      {
+        quizId: "1",
+        quizName: "Quiz 1: Bandits & Intro",
+        id: "q1_3",
+        question: "The goal of an agent is to maximize:",
+        options: [
+          { text: "Immediate rewards", correct: false, explanation: "Optimizing only the next reward can be short-sighted and miss better long-term outcomes." },
+          { text: "Expected cumulative reward", correct: true, explanation: "The standard objective is expected return: cumulative future reward, often discounted." },
+          { text: "Probability of correct classification", correct: false, explanation: "That is a supervised classification objective, not the general RL objective." },
+          { text: "State transitions", correct: false, explanation: "Transitions describe how the environment changes; they are not what the agent maximizes." }
+        ]
+      },
+      {
+        quizId: "1",
+        quizName: "Quiz 1: Bandits & Intro",
+        id: "q1_4",
+        question: "Which components define a Markov Decision Process (MDP)?",
+        options: [
+          { text: "State space S", correct: true, explanation: "The state space contains the possible states the agent/environment can be in." },
+          { text: "Action space A", correct: true, explanation: "The action space contains the actions available to the agent." },
+          { text: "Transition probabilities P", correct: true, explanation: "P describes how likely next states are after a state-action pair." },
+          { text: "Discount factor gamma", correct: true, explanation: "Gamma determines how future rewards are weighted in the return." }
+        ]
+      },
+      {
+        quizId: "1",
+        quizName: "Quiz 1: Bandits & Intro",
+        id: "q1_5",
+        question: "What does the Markov property state?",
+        options: [
+          { text: "The future depends on the past and present equally", correct: false, explanation: "The Markov property says the past is irrelevant once the present state is known." },
+          { text: "The future is independent of the past given the present", correct: true, explanation: "The current state is a sufficient summary of the relevant past information." },
+          { text: "The agent must remember the full trajectory", correct: false, explanation: "A Markov state removes the need to condition on the whole history." },
+          { text: "Rewards must be deterministic", correct: false, explanation: "Markov processes can be stochastic: rewards and transitions do not have to be deterministic." }
+        ]
+      },
+      {
+        quizId: "1",
+        quizName: "Quiz 1: Bandits & Intro",
+        id: "q1_6",
+        question: "What does a policy \\(\\pi(a|s)\\) represent?",
+        options: [
+          { text: "The probability of taking action a in state s", correct: true, explanation: "For a stochastic policy, \\(\\pi(a|s)\\) gives the probability assigned to action a in state s." },
+          { text: "The expected return of a state", correct: false, explanation: "Expected return from a state is the state-value function \\(V_\\pi(s)\\), not the policy." },
+          { text: "A mapping from states to actions or action probabilities", correct: true, explanation: "A deterministic policy maps states to actions; a stochastic policy maps states to action probabilities." },
+          { text: "The reward function", correct: false, explanation: "The reward function defines feedback from the environment; the policy defines the agent's behavior." }
+        ]
+      },
+      {
+        quizId: "1",
+        quizName: "Quiz 1: Bandits & Intro",
+        id: "q1_7",
+        question: "What does the action-value function \\(q_\\pi(s,a)\\) represent?",
+        options: [
+          { text: "Expected return starting in state s, taking action a, then following policy \\(\\pi\\)", correct: true, explanation: "This is the definition of \\(q_\\pi(s,a)\\): take action a in state s, then follow policy \\(\\pi\\) and evaluate expected return." },
+          { text: "Immediate reward after taking action a in state s", correct: false, explanation: "\\(q_\\pi\\) includes all future discounted rewards, not just the immediate reward." },
+          { text: "Probability of selecting action a in state s", correct: false, explanation: "That is the policy \\(\\pi(a|s)\\), not the action-value function." },
+          { text: "Optimal value function of taking action a in state s", correct: false, explanation: "\\(q_\\pi\\) is policy-specific. The optimal action-value function is \\(q^*(s,a)\\)." }
+        ]
+      },
+      {
+        quizId: "1",
+        quizName: "Quiz 1: Bandits & Intro",
+        id: "q1_8",
+        question: "Which statements about optimal value functions are correct?",
+        options: [
+          { text: "v*(s) is the maximum state value over all policies", correct: true, explanation: "v*(s) is the best achievable state value when choosing the best policy." },
+          { text: "q*(s,a) is the maximum action value over all policies", correct: true, explanation: "q*(s,a) is the best achievable expected return after taking action a in state s and then acting optimally." },
+          { text: "Knowing v*(s) allows us to derive the optimal policy directly without model", correct: false, explanation: "v*(s) alone does not directly rank actions unless the transition model is also known." },
+          { text: "Knowing q*(s,a) allows us to derive the optimal policy", correct: true, explanation: "Choose an action with maximal q*(s,a) in each state directly." },
+          { text: "Not all MDPs have an optimal value function", correct: false, explanation: "In the standard discounted finite MDP setting, an optimal value function exists." },
+          { text: "There can only be one optimal policy", correct: false, explanation: "There may be several optimal policies when multiple actions tie for best value." }
+        ]
+      },
+      {
+        quizId: "1",
+        quizName: "Quiz 1: Bandits & Intro",
+        id: "q1_9",
+        question: "What is the exploration-exploitation trade-off?",
+        options: [
+          { text: "Choosing between maximizing current reward and gathering information", correct: true, explanation: "Exploitation uses what currently looks best; exploration collects information that may improve future decisions." },
+          { text: "Choosing between deterministic and stochastic policies", correct: false, explanation: "Policy type can affect exploration, but the trade-off itself is about reward now versus information for later." },
+          { text: "Balancing short-term reward and learning about the environment", correct: true, explanation: "This is the same idea: act for immediate payoff or learn more to improve future payoff." },
+          { text: "Minimizing the discount factor", correct: false, explanation: "The discount factor weights future rewards; minimizing it is not the exploration-exploitation trade-off." }
+        ]
+      },
+      {
+        quizId: "1",
+        quizName: "Quiz 1: Bandits & Intro",
+        id: "q1_10",
+        question: "Which statements describe the multi-armed bandit problem?",
+        options: [
+          { text: "Only one state exists", correct: true, explanation: "A standard bandit has no meaningful state transitions: it can be viewed as a one-state problem." },
+          { text: "Actions have long-term effects on future states", correct: false, explanation: "That is an MDP issue; in standard bandits, actions do not change future states." },
+          { text: "Each action produces a reward from an unknown distribution", correct: true, explanation: "Each arm has an unknown reward distribution that must be learned by sampling." },
+          { text: "The goal is to maximize long-term reward", correct: true, explanation: "The agent wants high cumulative reward over repeated pulls." },
+          { text: "The goal is to have a linearly increasing regret", correct: false, explanation: "The goal is to minimize regret, ideally achieving sublinear regret." }
+        ]
+      },
+      {
+        quizId: "1",
+        quizName: "Quiz 1: Bandits & Intro",
+        id: "q1_11",
+        question: "What is the regret of an action in bandits?",
+        options: [
+          { text: "Difference between optimal value and chosen action value", correct: true, explanation: "Regret measures the loss from not choosing the optimal action." },
+          { text: "Total reward received", correct: false, explanation: "Total reward is performance, not regret." },
+          { text: "Expected future reward", correct: false, explanation: "That is a value/return concept, not regret." },
+          { text: "Difference between estimated and true value", correct: false, explanation: "That is estimation error, not regret." }
+        ]
+      },
+      {
+        quizId: "1",
+        quizName: "Quiz 1: Bandits & Intro",
+        id: "q1_12",
+        question: "Which of the following statements about the greedy bandit algorithm are correct?",
+        options: [
+          { text: "It always selects the action with the highest estimated value Qt(a).", correct: true, explanation: "Greedy action selection chooses \\(\\arg\\max_a Q_t(a)\\)." },
+          { text: "It explores all actions infinitely often.", correct: false, explanation: "Pure greedy has no forced exploration, so some actions may never be pulled again." },
+          { text: "It may get stuck exploiting a suboptimal action.", correct: true, explanation: "Early noisy rewards can make a bad action look best, and greedy may keep choosing it." },
+          { text: "It guarantees logarithmic regret.", correct: false, explanation: "Greedy can suffer linear regret if it gets stuck in a suboptimal arm." },
+          { text: "At t -> infinity, it's guaranteed to converge to the true action value q*(a).", correct: false, explanation: "Without sufficient exploration, estimates for unchosen actions may never converge." }
+        ]
+      },
+      {
+        quizId: "1",
+        quizName: "Quiz 1: Bandits & Intro",
+        id: "q1_13",
+        question: "In the epsilon-greedy algorithm, which of the following statements are true?",
+        options: [
+          { text: "With probability 1 - epsilon, the greedy action is selected.", correct: true, explanation: "Epsilon-greedy exploits the current best action with probability \\(1-\\epsilon\\)." },
+          { text: "It guarantees logarithmic regret.", correct: false, explanation: "Constant epsilon continues exploring and incurs linear regret." },
+          { text: "It ensures continued exploration when epsilon is constant.", correct: true, explanation: "A fixed \\(\\epsilon > 0\\) means non-greedy actions continue to be sampled." },
+          { text: "At t -> infinity, it's guaranteed to converge to the true action value q*(a).", correct: true, explanation: "In a stationary bandit with sample-average estimates and constant \\(\\epsilon > 0\\), every action is sampled infinitely often, so estimates converge to true values." }
+        ]
+      },
+      {
+        quizId: "1",
+        quizName: "Quiz 1: Bandits & Intro",
+        id: "q1_14",
+        question: "According to the UCB algorithm, which actions are most likely to be explored?",
+        options: [
+          { text: "Actions with high estimated value.", correct: true, explanation: "UCB selects actions with high estimated value plus an exploration bonus." },
+          { text: "Actions with high uncertainty", correct: true, explanation: "Higher uncertainty gives a larger exploration bonus." },
+          { text: "Actions that have been selected very often", correct: false, explanation: "Frequently selected actions have lower uncertainty and smaller bonuses." },
+          { text: "Actions that have been selected only a few times", correct: true, explanation: "Low selection count \\(N_t(a)\\) increases the UCB exploration term: \\(\\sqrt{\\ln(t)/N_t(a)}\\)." }
+        ]
+      },
+      {
+        quizId: "1",
+        quizName: "Quiz 1: Bandits & Intro",
+        id: "q1_15",
+        question: "When using the sample-average update rule in bandits, what is the step size alpha_t?",
+        options: [
+          { text: "Nt(a)", correct: false, explanation: "The step size is not the count itself; it decreases as the count grows." },
+          { text: "1 / Nt(a)", correct: true, explanation: "For sample average, the incremental update uses step size \\(1 / N_t(a)\\): \\(Q_{new}(a) = Q_{old}(a) + \\frac{1}{N_t(a)} [R_t - Q_{old}(a)]\\)." },
+          { text: "A constant", correct: false, explanation: "A constant step size is used for non-stationary problems, not the standard sample-average rule." },
+          { text: "The number of time steps t", correct: false, explanation: "The step size depends on how often the specific action was selected, not simply total steps." }
+        ]
+      },
+
+      // QUIZ 2 / 3
+      {
+        quizId: "2",
+        quizName: "Quiz 2/3: Value-Based Methods",
+        id: "q2_1",
+        question: "Which statements about Prediction and Control are correct?",
+        options: [
+          { text: "Prediction is also called policy optimization, as it optimizes a policy for a given MDP.", correct: false, explanation: "Prediction evaluates a given policy; it does not optimize or improve it." },
+          { text: "Prediction is also called policy evaluation, as it estimates the value function under a given policy and MDP.", correct: true, explanation: "Prediction asks how good a fixed policy is." },
+          { text: "Control is also called policy optimization, as it optimizes a policy for a given MDP.", correct: true, explanation: "Control searches for an optimal or improved policy." },
+          { text: "Control is also called policy evaluation, as it estimates the value function under a given policy and MDP.", correct: false, explanation: "That describes prediction, not control." }
+        ]
+      },
+      {
+        quizId: "2",
+        quizName: "Quiz 2/3: Value-Based Methods",
+        id: "q2_2",
+        question: "Which statement correctly describes planning? Planning...",
+        options: [
+          { text: "... uses a model of the environment.", correct: true, explanation: "Planning updates values or policies using transition and reward information from a model." },
+          { text: "... ignores the transition dynamics of the environment.", correct: false, explanation: "Planning relies directly on transition dynamics." },
+          { text: "... uses sampling to estimate expectations.", correct: false, explanation: "Sampling is typical of model-free methods; planning can compute expectations directly from the model." },
+          { text: "... can be used for policy evaluation.", correct: true, explanation: "A model can evaluate values for a fixed policy." },
+          { text: "... can be used for policy optimization.", correct: true, explanation: "A model can also be used to improve or find an optimal policy." }
+        ]
+      },
+      {
+        quizId: "2",
+        quizName: "Quiz 2/3: Value-Based Methods",
+        id: "q2_3",
+        question: "Which statements correctly describe the Bellman expectation equation?",
+        options: [
+          { text: "It expresses the value of a state in terms of expected future values.", correct: true, explanation: "It relates current value to expected reward plus discounted value of successor states." },
+          { text: "It depends on a specific fixed policy.", correct: true, explanation: "The expectation is evaluated under a particular fixed policy." },
+          { text: "It uses a maximization over actions.", correct: false, explanation: "Maximization belongs to the Bellman optimality equation." },
+          { text: "It averages over actions according to the policy.", correct: true, explanation: "For stochastic policies, action values are weighted by policy probabilities." },
+          { text: "It is used for control.", correct: false, explanation: "The expectation equation is primarily for prediction/policy evaluation." },
+          { text: "Has a closed-form solution.", correct: true, explanation: "For a fixed finite MDP, the Bellman expectation equations form a solvable linear system." }
+        ]
+      },
+      {
+        quizId: "2",
+        quizName: "Quiz 2/3: Value-Based Methods",
+        id: "q2_4",
+        question: "Which statements correctly describe the Bellman optimality equation?",
+        options: [
+          { text: "It defines the value of a state under the best possible policy.", correct: true, explanation: "It characterizes the optimal value function." },
+          { text: "It depends on a specific fixed policy.", correct: false, explanation: "It optimizes over actions rather than adhering to a single policy." },
+          { text: "It uses a maximization over actions.", correct: true, explanation: "The max chooses the action with the best expected return." },
+          { text: "It averages over actions according to the policy.", correct: false, explanation: "Averaging belongs to the expectation equation." },
+          { text: "It is used for control.", correct: true, explanation: "Control methods use it to derive optimal actions or policies." },
+          { text: "Has a closed form solution.", correct: false, explanation: "Due to the non-linear max operator, it is solved iteratively (e.g., via Value Iteration)." }
+        ]
+      },
+      {
+        quizId: "2",
+        quizName: "Quiz 2/3: Value-Based Methods",
+        id: "q2_5",
+        question: "In case the model is known, the optimal policy can be obtained by acting greedily with respect to:",
+        options: [
+          { text: "optimal state-value function.", correct: true, explanation: "With a known model, \\(V^*\\) plus transition dynamics allows one-step lookahead action ranking." },
+          { text: "optimal action-value function.", correct: true, explanation: "\\(Q^*\\) directly provides the value of each action, so greedy selection is immediate." }
+        ]
+      },
+      {
+        quizId: "2",
+        quizName: "Quiz 2/3: Value-Based Methods",
+        id: "q2_6",
+        question: "In case the model is unknown, the optimal policy can be obtained by acting greedily with respect to:",
+        options: [
+          { text: "optimal state-value function.", correct: false, explanation: "Without a model, \\(V^*\\) alone does not tell which action leads to which successor state." },
+          { text: "optimal action-value function.", correct: true, explanation: "\\(Q^*\\) stores action-specific returns directly, requiring no model for greedy action choice." }
+        ]
+      },
+      {
+        quizId: "2",
+        quizName: "Quiz 2/3: Value-Based Methods",
+        id: "q2_7",
+        question: "Which statements correctly compare policy iteration and value iteration?",
+        options: [
+          { text: "Policy iteration alternates between policy evaluation and policy optimization.", correct: true, explanation: "It alternates full evaluation of \\(\\pi\\) with greedy policy improvement." },
+          { text: "Value iteration combines policy evaluation and policy optimization in a single update step.", correct: true, explanation: "Its Bellman optimality backup simultaneously updates values and applies a max over actions." },
+          { text: "Only policy iteration requires a model of the environment.", correct: false, explanation: "Classical DP versions of both policy and value iteration require a model." },
+          { text: "Value iteration requires full policy evaluation before each update.", correct: false, explanation: "That is policy iteration; value iteration truncates evaluation to a single sweep." },
+          { text: "Both methods rely on the Bellman optimality principle.", correct: true, explanation: "Both are dynamic programming methods designed to solve control problems." }
+        ]
+      },
+      {
+        quizId: "2",
+        quizName: "Quiz 2/3: Value-Based Methods",
+        id: "q2_8",
+        question: "Which of the following statements about bootstrapping are correct?",
+        options: [
+          { text: "In bootstrapping, updates involve an estimate of the expected return.", correct: true, explanation: "The target uses an existing learned estimate for the remaining trajectory return." },
+          { text: "In bootstrapping, updates involve a sample of the expected return.", correct: false, explanation: "Using a sampled return is the definition of sampling, not bootstrapping itself." },
+          { text: "Dynamic Programming uses bootstrapping.", correct: true, explanation: "DP updates values from successor state value estimates." },
+          { text: "Monte Carlo methods use bootstrapping.", correct: false, explanation: "MC relies purely on realized episode returns without value estimate targets." },
+          { text: "Temporal Difference methods use bootstrapping.", correct: true, explanation: "TD targets include the reward plus a bootstrapped next-state value estimate." }
+        ]
+      },
+      {
+        quizId: "2",
+        quizName: "Quiz 2/3: Value-Based Methods",
+        id: "q2_9",
+        question: "Which of the following statements about sampling are correct?",
+        options: [
+          { text: "In sampling, updates involve an estimate of the expected return.", correct: false, explanation: "That describes bootstrapping." },
+          { text: "In bootstrapping, updates involve a sample of the expected return.", correct: true, explanation: "As marked in the quiz, the sampled transition replaces full model expectations." },
+          { text: "Dynamic Programming uses sampling.", correct: false, explanation: "Classical DP computes full expectations from the model rather than using sample transitions." },
+          { text: "Monte Carlo methods use sampling.", correct: true, explanation: "MC estimates returns from sampled rollouts." },
+          { text: "Temporal Difference methods use sampling.", correct: true, explanation: "TD updates along sampled transitions from experience." }
+        ]
+      },
+      {
+        quizId: "2",
+        quizName: "Quiz 2/3: Value-Based Methods",
+        id: "q2_10",
+        question: "Which statements correctly describe Monte Carlo (MC) and TD(0)?",
+        options: [
+          { text: "MC estimates are unbiased.", correct: true, explanation: "Full sampled returns are unbiased estimators of the true policy return." },
+          { text: "MC estimates are biased.", correct: false, explanation: "MC does not bootstrap, avoiding target bias." },
+          { text: "TD estimates are unbiased.", correct: false, explanation: "TD targets depend on value estimates, introducing bias." },
+          { text: "TD estimates are biased.", correct: true, explanation: "Bootstrapping on imperfect value estimates produces bias." },
+          { text: "TD estimates have higher variance than MC.", correct: false, explanation: "TD targets depend on a single transition, producing significantly lower variance than full trajectories." },
+          { text: "TD estimates have lower variance than MC.", correct: true, explanation: "Bootstrapping prevents the accumulation of stochastic noise over long horizons." }
+        ]
+      },
+      {
+        quizId: "2",
+        quizName: "Quiz 2/3: Value-Based Methods",
+        id: "q2_11",
+        question: "Which statements correctly describe n-step returns?",
+        options: [
+          { text: "A 1-step return corresponds to TD(0).", correct: true, explanation: "One reward plus the bootstrapped next-state value is exactly TD(0)." },
+          { text: "An n-step return uses only the immediate reward.", correct: false, explanation: "It accumulates n rewards before bootstrapping." },
+          { text: "Increasing n makes the method more similar to Monte Carlo.", correct: true, explanation: "Larger n incorporates more empirical rewards and less bootstrapped estimation." },
+          { text: "n-step returns eliminate the need for discounting.", correct: false, explanation: "Discounting \\(\\gamma\\) is still applied across all steps." }
+        ]
+      },
+      {
+        quizId: "2",
+        quizName: "Quiz 2/3: Value-Based Methods",
+        id: "q2_12",
+        question: "Which statements correctly describe SARSA and Q-learning?",
+        options: [
+          { text: "Both used for policy evaluation (prediction).", correct: false, explanation: "Both are control algorithms that learn action values to optimize behavior." },
+          { text: "Both are on-policy.", correct: false, explanation: "SARSA is on-policy; Q-learning is off-policy." },
+          { text: "SARSA uses the action actually taken in the next state.", correct: true, explanation: "SARSA targets: \\(R_{t+1} + \\gamma Q(S_{t+1}, A_{t+1})\\)." },
+          { text: "Q-learning uses a greedy estimate of the next state's value.", correct: true, explanation: "Q-learning targets: \\(R_{t+1} + \\gamma \\max_a Q(S_{t+1}, a)\\)." }
+        ]
+      },
+      {
+        quizId: "2",
+        quizName: "Quiz 2/3: Value-Based Methods",
+        id: "q2_13",
+        question: "Which statements correctly describe importance sampling in reinforcement learning?",
+        options: [
+          { text: "It is only applicable in model-based reinforcement learning.", correct: false, explanation: "Importance sampling is widely used in model-free off-policy learning." },
+          { text: "It is used to correct for differences between the behavior policy and the target policy.", correct: true, explanation: "It reweights samples by the probability ratio \\(\\pi(a|s) / b(a|s)\\)." },
+          { text: "It allows using data collected from one policy to evaluate another policy.", correct: true, explanation: "This is the core foundation of off-policy policy evaluation." },
+          { text: "It eliminates all variance in off-policy estimates.", correct: false, explanation: "Importance ratios often dramatically increase variance." }
+        ]
+      },
+
+      // QUIZ 4
+      {
+        quizId: "4",
+        quizName: "Quiz 4: Value Approximation & DQN",
+        id: "q4_1",
+        question: "What statements about Q-Learning are correct?",
+        options: [
+          { text: "It's an on-policy method.", correct: false, explanation: "Q-learning is off-policy because its backup uses the greedy action regardless of behavior choice." },
+          { text: "To converge to q*, the behaviour policy must converge to the greedy policy.", correct: false, explanation: "Convergence requires adequate exploration, not that behavior becomes greedy." },
+          { text: "Uses a greedy estimate of the next state's value.", correct: true, explanation: "The TD target uses \\(\\max_a Q(s', a)\\)." },
+          { text: "Is a control algorithm.", correct: true, explanation: "It learns optimal action values to derive an improved policy." },
+          { text: "Uses bootstrapping.", correct: true, explanation: "It updates from immediate reward plus the estimated next state action-value." }
+        ]
+      },
+      {
+        quizId: "4",
+        quizName: "Quiz 4: Value Approximation & DQN",
+        id: "q4_2",
+        question: "Which factors explain the maximization bias in Q-learning? It is caused by ...",
+        options: [
+          { text: "... having noisy value estimates.", correct: true, explanation: "Taking the maximum over noisy estimates statistically leads to positive overestimation." },
+          { text: "... using the same value estimate for both to select and evaluate.", correct: true, explanation: "Using the same network/data to choose the maximizing action and evaluate its value causes bias." },
+          { text: "... delayed rewards.", correct: false, explanation: "Delayed rewards complicate credit assignment, but do not cause maximization bias." },
+          { text: "... a too high learning rate.", correct: false, explanation: "A high learning rate creates instability, but does not define maximization bias." }
+        ]
+      },
+      {
+        quizId: "4",
+        quizName: "Quiz 4: Value Approximation & DQN",
+        id: "q4_3",
+        question: "Which statements correctly describe value function approximation?",
+        options: [
+          { text: "It represents values using a parameterized function.", correct: true, explanation: "Values are parameterized by a vector of weights \\(\\mathbf{w}\\)." },
+          { text: "It allows handling large or continuous state spaces.", correct: true, explanation: "Generalization allows evaluating unvisited states in continuous domains." },
+          { text: "It stores exact values for every state-action pair.", correct: true, explanation: "Tabular representations are a special linear case using one-hot state features." },
+          { text: "It reduced need for exploration.", correct: false, explanation: "Approximation does not remove the fundamental exploration challenge." },
+          { text: "It guaranteed convergence in all cases.", correct: false, explanation: "Approximation combined with bootstrapping and off-policy updates can diverge." }
+        ]
+      },
+      {
+        quizId: "4",
+        quizName: "Quiz 4: Value Approximation & DQN",
+        id: "q4_4",
+        question: "Which specific properties characterize function approximation in reinforcement learning?",
+        options: [
+          { text: "Training data is typically not independent and identically distributed.", correct: true, explanation: "Consecutive transitions along trajectories are temporally correlated." },
+          { text: "The optimization problem is always convex.", correct: false, explanation: "Nonlinear functions like deep neural networks introduce non-convex loss surfaces." },
+          { text: "Target values can change during learning.", correct: true, explanation: "Bootstrapped targets depend on the continuously evolving parameters." },
+          { text: "Updates are based on a fixed dataset collected before training.", correct: false, explanation: "Online RL gathers experience actively during training." }
+        ]
+      },
+      {
+        quizId: "4",
+        quizName: "Quiz 4: Value Approximation & DQN",
+        id: "q4_5",
+        question: "Which statements correctly describe linear function approximation?",
+        options: [
+          { text: "The value is represented as a weighted sum of features.", correct: true, explanation: "\\(V(s) = \\mathbf{w}^T \\mathbf{x}(s)\\)." },
+          { text: "Learning consists of updating the weights of the linear function.", correct: true, explanation: "Gradient steps update weight vector \\(\\mathbf{w}\\)." },
+          { text: "Tabular representation can be seen as a special case using one-hot features.", correct: true, explanation: "Each table cell corresponds to a single one-hot feature indicator." },
+          { text: "The loss function is convex in the parameters.", correct: true, explanation: "Mean squared value error with linear parameters is convex." }
+        ]
+      },
+      {
+        quizId: "4",
+        quizName: "Quiz 4: Value Approximation & DQN",
+        id: "q4_6",
+        question: "Which statements are true about MC and TD with function approximation?",
+        options: [
+          { text: "Both updates are exact gradient descent steps.", correct: false, explanation: "TD targets depend on weights, making it a semi-gradient method." },
+          { text: "Both are guaranteed to converge (close) to the global minimum with a linear approximator.", correct: true, explanation: "Under standard linear assumptions, both converge to the neighborhood of the optimum." },
+          { text: "Both are guaranteed to converge (close) to the local minimum with a non-linear approximator.", correct: false, explanation: "Nonlinear approximation with bootstrapping offers no general convergence guarantee." }
+        ]
+      },
+      {
+        quizId: "4",
+        quizName: "Quiz 4: Value Approximation & DQN",
+        id: "q4_7",
+        question: "Which components are part of the \"deadly triad\" that can lead to divergence?",
+        options: [
+          { text: "Off-policy learning", correct: true, explanation: "Learning about a target policy using behavior trajectories is element 1." },
+          { text: "Explorative policy", correct: false, explanation: "Exploration is not an element of the triad." },
+          { text: "Bootstrapping", correct: true, explanation: "Updating estimates using successor value estimates is element 2." },
+          { text: "Sampling", correct: false, explanation: "Sampling experience is standard RL behavior." },
+          { text: "Function Approximation", correct: true, explanation: "Using parameterized function approximation is element 3." },
+          { text: "Experience Replay", correct: false, explanation: "Replay buffers stabilize training; they are not part of the triad." }
+        ]
+      },
+      {
+        quizId: "4",
+        quizName: "Quiz 4: Value Approximation & DQN",
+        id: "q4_8",
+        question: "What are the advantages of batch reinforcement learning with experience replay compared to online SGD?",
+        options: [
+          { text: "It breaks correlations between consecutive samples", correct: true, explanation: "Random uniform mini-batches break temporal dependency across sequential states." },
+          { text: "It guarantees unbiased value estimates", correct: false, explanation: "Replay does not eliminate bootstrapping or sampling bias." },
+          { text: "It replaced need of epsilon-greedy for exploration.", correct: false, explanation: "Replay stores gathered data; active exploration is still needed." },
+          { text: "It allows reusing past experience multiple times.", correct: true, explanation: "Transitions are sampled repeatedly, improving sample efficiency." },
+          { text: "It makes targets stationary.", correct: false, explanation: "Replay alone does not fix the moving target problem (target networks are needed)." }
+        ]
+      },
+      {
+        quizId: "4",
+        quizName: "Quiz 4: Value Approximation & DQN",
+        id: "q4_9",
+        question: "Which statements correctly describe how DQNs differ from tabular Q-learning?",
+        options: [
+          { text: "DQN is on-policy instead of off-policy", correct: false, explanation: "DQN remains an off-policy Q-learning method." },
+          { text: "DQN uses a function approximator instead of a table", correct: true, explanation: "Deep neural networks predict Q-values from state observations." },
+          { text: "DQN uses experience replay to reuse past transitions", correct: true, explanation: "Replay buffers store transitions for mini-batch updates." },
+          { text: "DQN eliminates bootstrapping from Q-learning", correct: false, explanation: "DQN relies on 1-step bootstrapped Bellman targets." },
+          { text: "DQN uses a separate target network to stabilize learning", correct: true, explanation: "Frozen target network weights reduce moving-target oscillations." }
+        ]
+      },
+      {
+        quizId: "4",
+        quizName: "Quiz 4: Value Approximation & DQN",
+        id: "q4_10",
+        question: "What is the main idea of prioritized experience replay?",
+        options: [
+          { text: "Sample transitions uniformly from memory", correct: false, explanation: "Uniform sampling is the standard replay approach." },
+          { text: "Samples rarely picked transitions", correct: false, explanation: "Priority is not determined by visit rarity." },
+          { text: "Sample transitions based on their TD error", correct: true, explanation: "Larger TD error signals higher surprise and greater potential for learning." },
+          { text: "Samples transitions based on their recency", correct: false, explanation: "Recency is not the primary prioritization signal." }
+        ]
+      },
+
+      // QUIZ 5
+      {
+        quizId: "5",
+        quizName: "Quiz 5: Policy Gradients",
+        id: "q5_1",
+        question: "Which statements correctly describe policy-based methods?",
+        options: [
+          { text: "They directly parameterize and optimize a policy.", correct: true, explanation: "Policy-based methods learn \\(\\pi_\\theta(a|s)\\) without deriving it through an intermediate value function." },
+          { text: "They require computing argmax over actions for decision making.", correct: false, explanation: "Argmax is standard in value-based methods; policy models sample or evaluate actions directly." },
+          { text: "They can naturally represent stochastic policies.", correct: true, explanation: "Probabilities or distribution parameters are output directly." },
+          { text: "They always learn a value function first.", correct: false, explanation: "Vanilla REINFORCE learns purely from trajectory returns without a value function." }
+        ]
+      },
+      {
+        quizId: "5",
+        quizName: "Quiz 5: Policy Gradients",
+        id: "q5_2",
+        question: "Why can value-based methods struggle in continuous action spaces?",
+        options: [
+          { text: "They require selecting the best action over infinitely many possibilities.", correct: true, explanation: "Evaluating \\(\\arg\\max_a Q(s,a)\\) over continuous spaces requires continuous optimization at each step." },
+          { text: "They cannot use neural networks.", correct: false, explanation: "Value methods can and do use deep neural networks." },
+          { text: "Action maximization becomes harder than in small discrete spaces.", correct: true, explanation: "Discrete spaces can evaluate all actions exhaustively; continuous spaces cannot." },
+          { text: "They are always on-policy.", correct: false, explanation: "Many value methods (e.g. Q-learning) are off-policy." }
+        ]
+      },
+      {
+        quizId: "5",
+        quizName: "Quiz 5: Policy Gradients",
+        id: "q5_3",
+        question: "Why can stochastic policies be preferable?",
+        options: [
+          { text: "They can handle partial observability.", correct: true, explanation: "When observations alias different underlying states, randomized action selection prevents deterministic traps." },
+          { text: "They guarantee faster convergence.", correct: false, explanation: "Stochasticity does not ensure faster convergence rates." },
+          { text: "They allow explicit exploration.", correct: true, explanation: "Sampling actions maintains organic behavioral exploration." },
+          { text: "They eliminate the need for reward discounting.", correct: false, explanation: "Discounting is independent of whether a policy is stochastic or deterministic." },
+          { text: "They can represent multiple equally good actions.", correct: true, explanation: "Probability mass can be divided across tied optimal actions." }
+        ]
+      },
+      {
+        quizId: "5",
+        quizName: "Quiz 5: Policy Gradients",
+        id: "q5_4",
+        question: "In the aliased gridworld, what problem is highlighted?",
+        options: [
+          { text: "Different true states may look identical to the agent.", correct: true, explanation: "State aliasing means an observation does not uniquely pinpoint the true state." },
+          { text: "History can matter for optimal decisions.", correct: true, explanation: "Past observation sequences help disambiguate current position." },
+          { text: "Full observability is guaranteed by local observations.", correct: false, explanation: "Local sensory views are frequently ambiguous." },
+          { text: "Ambiguous observations can hurt deterministic policies.", correct: true, explanation: "A deterministic policy must commit to one fixed move for identical observations." },
+          { text: "Partial observability means no policy can learn anything useful.", correct: false, explanation: "Stochastic policies or recurrent memory allow learning in POMDPs." }
+        ]
+      },
+      {
+        quizId: "5",
+        quizName: "Quiz 5: Policy Gradients",
+        id: "q5_5",
+        question: "Which are valid policy optimization objectives?",
+        options: [
+          { text: "Maximum immediate reward.", correct: false, explanation: "Immediate reward ignores long-term returns." },
+          { text: "Expected return from the start state.", correct: true, explanation: "Standard episodic objective: \\(J(\\theta) = \\mathbb{E}_{\\pi_\\theta}[G_0]\\)." },
+          { text: "Minimum variance of returns.", correct: false, explanation: "Return variance reduction is not the standard optimization objective." },
+          { text: "Average reward per time step.", correct: true, explanation: "Standard continuing objective: \\(J(\\theta) = \\sum_s d^\\pi(s) \\sum_a \\pi_\\theta(a|s) R(s,a)\\)." }
+        ]
+      },
+      {
+        quizId: "5",
+        quizName: "Quiz 5: Policy Gradients",
+        id: "q5_6",
+        question: "What is a key implication of the policy gradient theorem?",
+        options: [
+          { text: "It requires an exact model of transition probabilities to compute updates.", correct: false, explanation: "The theorem eliminates transition derivatives, allowing model-free gradient estimation." },
+          { text: "It motivates actor updates using expected policy-gradient signals estimated from experience.", correct: true, explanation: "Policy parameters update via score-function gradients weighted by returns or advantages." },
+          { text: "It proves value-based and policy-based methods are identical in all settings.", correct: false, explanation: "It establishes the policy derivative; it does not equate the two paradigms." }
+        ]
+      },
+      {
+        quizId: "5",
+        quizName: "Quiz 5: Policy Gradients",
+        id: "q5_7",
+        question: "What are the disadvantages of vanilla REINFORCE?",
+        options: [
+          { text: "High variance updates.", correct: true, explanation: "Full Monte Carlo returns across entire episodes introduce substantial noise." },
+          { text: "Sample inefficiency in many tasks.", correct: true, explanation: "Requires many complete trajectory rollouts to extract clear gradient direction." },
+          { text: "Biased estimates.", correct: false, explanation: "Monte Carlo returns provide an unbiased estimate of the return." }
+        ]
+      },
+      {
+        quizId: "5",
+        quizName: "Quiz 5: Policy Gradients",
+        id: "q5_8",
+        question: "What is true about baselines in policy gradients?",
+        options: [
+          { text: "Introduces bias by changing the expectation.", correct: false, explanation: "A state baseline has an expected gradient of zero: \\(\\sum_a \\nabla_\\theta \\pi_\\theta(a|s) b(s) = 0\\)." },
+          { text: "They can reduce update variance.", correct: true, explanation: "Centering return signals against an expected baseline reduces gradient noise." },
+          { text: "Must be a constant.", correct: false, explanation: "A baseline can vary across states (e.g., \\(V(s)\\))." },
+          { text: "Can depend on the state.", correct: true, explanation: "State-dependent baselines like \\(V(s)\\) preserve unbiased gradients." },
+          { text: "Can depend on the action.", correct: false, explanation: "Action-dependent baselines generally introduce bias." }
+        ]
+      },
+      {
+        quizId: "5",
+        quizName: "Quiz 5: Policy Gradients",
+        id: "q5_9",
+        question: "Why are n-step methods and GAE used?",
+        options: [
+          { text: "To control bias-variance trade-offs.", correct: true, explanation: "Shorter rollouts exhibit low variance but high bias; longer rollouts shift toward low bias and high variance." },
+          { text: "To combine information from different temporal horizons.", correct: true, explanation: "GAE calculates an exponential average of multi-step advantage estimators using \\(\\lambda\\)." },
+          { text: "To eliminate all approximation error.", correct: false, explanation: "Approximation error is not eliminated." },
+          { text: "To avoid learning any critic.", correct: false, explanation: "GAE explicitly relies on a learned state-value critic." }
+        ]
+      },
+
+      // QUIZ 7
+      {
+        quizId: "7",
+        quizName: "Quiz 7: Advanced Policy Gradients (PPO, TRPO, SAC)",
+        id: "q7_1",
+        question: "Which of the following are advantages of policy-based methods over value-based methods?",
+        options: [
+          { text: "They can naturally handle continuous action spaces", correct: true, explanation: "Gaussian policies parameterize continuous action distributions directly without an argmax step." },
+          { text: "They are always more sample efficient than value-based methods", correct: false, explanation: "On-policy policy gradients are often significantly less sample efficient than off-policy value methods." },
+          { text: "They can learn stochastic policies directly", correct: true, explanation: "Stochastic distribution parameters are optimized directly." },
+          { text: "They avoid the inner maximization over actions at each step", correct: true, explanation: "Actions are sampled directly from \\(\\pi(a|s)\\) rather than solving \\(\\max_a Q(s,a)\\)." },
+          { text: "They are guaranteed to converge to the global optimum", correct: false, explanation: "Nonlinear deep policy optimization is non-convex without global optimum guarantees." },
+          { text: "They support entropy bonuses and trust-region constraints naturally", correct: true, explanation: "These terms can be added directly to the policy objective." }
+        ]
+      },
+      {
+        quizId: "7",
+        quizName: "Quiz 7: Advanced Policy Gradients (PPO, TRPO, SAC)",
+        id: "q7_2",
+        question: "Why were methods such as TRPO and PPO introduced on top of basic policy gradient methods?",
+        options: [
+          { text: "Basic policy gradients require a model of the environment", correct: false, explanation: "Basic policy gradient methods are model-free." },
+          { text: "Basic policy gradients are often data inefficient", correct: true, explanation: "They require fresh on-policy samples and cannot reuse past trajectories freely." },
+          { text: "Basic policy gradients cannot represent stochastic policies", correct: false, explanation: "Classic REINFORCE explicitly uses stochastic policies." },
+          { text: "Basic policy gradients tend to have noisy gradient estimates", correct: true, explanation: "Sampled trajectory returns suffer from high variance." },
+          { text: "Basic policy gradients can make unstable updates", correct: true, explanation: "An overly large gradient step can drastically collapse policy performance." }
+        ]
+      },
+      {
+        quizId: "7",
+        quizName: "Quiz 7: Advanced Policy Gradients (PPO, TRPO, SAC)",
+        id: "q7_3",
+        question: "What statements about importance sampling are true?",
+        options: [
+          { text: "It can correct bias caused by using data collected from a different policy", correct: true, explanation: "Reweighting by \\(r(\\theta) = \\pi_\\theta(a|s) / \\pi_{old}(a|s)\\) corrects for distribution mismatch." },
+          { text: "It can correct bias introduced by temporal-difference bootstrapping", correct: false, explanation: "It corrects policy distribution mismatch, not bootstrapping bias." },
+          { text: "It generally reduces the variance of the learning signal", correct: false, explanation: "Importance ratios can explode, generally increasing variance." },
+          { text: "It generally increases the variance of the learning signal", correct: true, explanation: "The product of probability ratios often introduces substantial variance." }
+        ]
+      },
+      {
+        quizId: "7",
+        quizName: "Quiz 7: Advanced Policy Gradients (PPO, TRPO, SAC)",
+        id: "q7_4",
+        question: "Which statements about how NPG, TRPO, and PPO address unstable policy updates are true?",
+        options: [
+          { text: "PPO enforces an exact hard KL trust-region constraint at every update step.", correct: false, explanation: "TRPO enforces explicit KL constraints; PPO uses a clipped surrogate objective." },
+          { text: "They mainly stabilize training by removing TD bootstrapping bias from the critic.", correct: false, explanation: "Their core focus is controlling policy update steps, not TD bootstrapping." },
+          { text: "NPG uses local policy geometry (via Fisher information) to precondition the update direction.", correct: true, explanation: "Natural Policy Gradient rescales updates with the inverse Fisher Information Matrix." },
+          { text: "TRPO optimizes a surrogate objective under an explicit trust-region style constraint.", correct: true, explanation: "TRPO maximizes the surrogate objective subject to an average KL divergence bound." },
+          { text: "Their shared goal is to limit policy change per update, not just parameter change.", correct: true, explanation: "Small changes in parameter space can cause huge shifts in policy probability distributions." }
+        ]
+      },
+      {
+        quizId: "7",
+        quizName: "Quiz 7: Advanced Policy Gradients (PPO, TRPO, SAC)",
+        id: "q7_5",
+        question: "How does PPO enforce that policy updates remain small?",
+        options: [
+          { text: "By solving a constrained optimization problem with an explicit KL bound", correct: false, explanation: "That is TRPO's approach using conjugate gradient and line searches." },
+          { text: "By clipping the policy ratio to stay within a fixed range around 1", correct: true, explanation: "PPO clips \\(r_t(\\theta)\\) to \\([1-\\epsilon, 1+\\epsilon]\\) to prevent destructive updates." },
+          { text: "By using the Fisher matrix to rescale the gradient", correct: false, explanation: "That describes Natural Policy Gradient." },
+          { text: "By discarding any batch where the KL exceeds a threshold", correct: false, explanation: "Clipping the objective is PPO's defining mechanism." }
+        ]
+      },
+      {
+        quizId: "7",
+        quizName: "Quiz 7: Advanced Policy Gradients (PPO, TRPO, SAC)",
+        id: "q7_6",
+        question: "What is the main advantage of PPO over TRPO?",
+        options: [
+          { text: "PPO is fully off-policy and can reuse arbitrary replay-buffer data", correct: false, explanation: "PPO remains predominantly on-policy." },
+          { text: "PPO optimized the true objective instead of a surrogate objective", correct: false, explanation: "PPO optimizes a clipped surrogate objective." },
+          { text: "PPO is computationally cheaper", correct: true, explanation: "It uses first-order stochastic gradient methods instead of second-order Hessian-vector products." }
+        ]
+      },
+      {
+        quizId: "7",
+        quizName: "Quiz 7: Advanced Policy Gradients (PPO, TRPO, SAC)",
+        id: "q7_7",
+        question: "In which case is the PPO objective clipped? (A = advantage, r = policy ratio, e = threshold)",
+        options: [
+          { text: "r < 1 - e and A > 0", correct: false, explanation: "When advantage is positive and ratio is small, the update is unclipped." },
+          { text: "r < 1 - e and A < 0", correct: true, explanation: "When advantage is negative, clipping prevents over-penalizing the policy when ratio is already low." },
+          { text: "r > 1 + e and A > 0", correct: true, explanation: "When advantage is positive, clipping prevents excessively boosting the action probability." },
+          { text: "r < 1 + e and A < 0", correct: false, explanation: "This condition is too broad; clipping occurs below 1 - e when A < 0." }
+        ]
+      },
+      {
+        quizId: "7",
+        quizName: "Quiz 7: Advanced Policy Gradients (PPO, TRPO, SAC)",
+        id: "q7_8",
+        question: "What is a common policy parameterization for continuous control?",
+        options: [
+          { text: "Softmax policy", correct: false, explanation: "Softmax is standard for finite discrete action spaces." },
+          { text: "Gaussian policy", correct: true, explanation: "The network outputs the mean \\(\\mu(s)\\) and standard deviation \\(\\sigma(s)\\) of a Gaussian distribution." },
+          { text: "e-greedy policy", correct: false, explanation: "Epsilon-greedy is primarily used in discrete value-based exploration." }
+        ]
+      },
+      {
+        quizId: "7",
+        quizName: "Quiz 7: Advanced Policy Gradients (PPO, TRPO, SAC)",
+        id: "q7_9",
+        question: "What is true about DDPG?",
+        options: [
+          { text: "On-policy", correct: false, explanation: "DDPG is an off-policy algorithm using experience replay." },
+          { text: "Off-policy", correct: true, explanation: "It stores transitions in a replay buffer and trains off-policy." },
+          { text: "Deterministic", correct: true, explanation: "Deep Deterministic Policy Gradient outputs a single deterministic action vector \\(\\mu(s)\\)." },
+          { text: "Stochastic", correct: false, explanation: "The learned actor is deterministic." },
+          { text: "Used for discrete control", correct: false, explanation: "DDPG is specifically designed for continuous action domains." },
+          { text: "Used for continuous control", correct: true, explanation: "It applies deterministic policy gradients to continuous action problems." }
+        ]
+      },
+      {
+        quizId: "7",
+        quizName: "Quiz 7: Advanced Policy Gradients (PPO, TRPO, SAC)",
+        id: "q7_10",
+        question: "Which statements about DQN and DDPG are true?",
+        options: [
+          { text: "Both use experience replay", correct: true, explanation: "Both store transitions to sample i.i.d. minibatches." },
+          { text: "Both use fixed target networks", correct: true, explanation: "Both use target networks to stabilize temporal difference updates." },
+          { text: "Both use a critic updated with TD", correct: true, explanation: "DQN's Q-network and DDPG's critic are trained via Bellman TD targets." },
+          { text: "Both use a learned maximizer", correct: false, explanation: "DDPG uses a learned actor network to maximize Q; DQN uses an exact argmax over discrete values." }
+        ]
+      },
+      {
+        quizId: "7",
+        quizName: "Quiz 7: Advanced Policy Gradients (PPO, TRPO, SAC)",
+        id: "q7_11",
+        question: "What is the key distinguishing feature of SAC compared to other policy gradient methods?",
+        options: [
+          { text: "It uses a deterministic policy gradient", correct: false, explanation: "That describes DDPG; SAC utilizes a stochastic Gaussian actor." },
+          { text: "It explicitly maximizes policy entropy alongside return", correct: true, explanation: "Soft Actor-Critic optimizes an entropy-regularized objective: \\(J(\\pi) = \\mathbb{E}[\\sum (R + \\alpha \\mathcal{H}(\\pi(\\cdot|s_t)))]\\)." },
+          { text: "It minimizes the KL divergence to a target distribution", correct: false, explanation: "Its defining characteristic is the maximum entropy framework." }
+        ]
+      },
+
+      // QUIZ 8a
+      {
+        quizId: "8a",
+        quizName: "Quiz 8a: Imitation Learning & Offline RL",
+        id: "q8a_1",
+        question: "Which statements are true about Imitation Learning (IL) and Offline RL?",
+        options: [
+          { text: "Both use demonstrations", correct: true, explanation: "Both learn from logged or expert datasets rather than autonomous online trial-and-error." },
+          { text: "Both require rewards", correct: false, explanation: "Imitation learning (such as Behavioral Cloning) can learn directly from state-action pairs without reward signals." },
+          { text: "Both maximize the return", correct: false, explanation: "Offline RL optimizes return; Behavioral Cloning minimizes supervised action prediction error." }
+        ]
+      },
+      {
+        quizId: "8a",
+        quizName: "Quiz 8a: Imitation Learning & Offline RL",
+        id: "q8a_2",
+        question: "What is the main limitation of DAgger?",
+        options: [
+          { text: "Expert must be queryable at training time", correct: true, explanation: "DAgger requires an interactive expert available during training to label states visited by the learner." },
+          { text: "Only works with discrete action spaces", correct: false, explanation: "DAgger functions with continuous actions as well." },
+          { text: "Requires a differentiable reward function", correct: false, explanation: "DAgger uses expert supervision, not reward gradients." },
+          { text: "Requires a pre-trained world model", correct: false, explanation: "DAgger interacts directly with the environment; no world model is needed." }
+        ]
+      },
+      {
+        quizId: "8a",
+        quizName: "Quiz 8a: Imitation Learning & Offline RL",
+        id: "q8a_3",
+        question: "What is Behavioral Cloning?",
+        options: [
+          { text: "Policy search via Monte Carlo tree search", correct: false, explanation: "Behavioral cloning is supervised learning, not tree search." },
+          { text: "Q-learning with an expert policy as teacher", correct: false, explanation: "It does not optimize value functions." },
+          { text: "RL using an expert-designed reward function", correct: false, explanation: "That resembles inverse RL or reward shaping." },
+          { text: "Supervised learning on expert state-action pairs", correct: true, explanation: "The policy is trained with supervised loss to map expert states to expert actions." }
+        ]
+      },
+      {
+        quizId: "8a",
+        quizName: "Quiz 8a: Imitation Learning & Offline RL",
+        id: "q8a_4",
+        question: "How does BC's policy error grow with horizon T?",
+        options: [
+          { text: "Logarithmically: O(log T)", correct: false, explanation: "Errors compound over time." },
+          { text: "Linearly: O(T)", correct: false, explanation: "Linear growth \\(O(T)\\) is achieved by DAgger, not basic BC." },
+          { text: "Quadratically: O(T^2)", correct: true, explanation: "Early distribution shift creates compounding errors bounded by \\(O(T^2)\\)." },
+          { text: "Exponentially: O(2^T)", correct: false, explanation: "The compounding error bound is quadratic." }
+        ]
+      },
+      {
+        quizId: "8a",
+        quizName: "Quiz 8a: Imitation Learning & Offline RL",
+        id: "q8a_5",
+        question: "What is the key idea of DAgger?",
+        options: [
+          { text: "Augment the dataset with synthetic world-model rollouts", correct: false, explanation: "DAgger queries the expert on learner rollouts, not model rollouts." },
+          { text: "Filter the dataset to remove suboptimal demonstrations", correct: false, explanation: "It aggregates newly labeled data rather than filtering." },
+          { text: "Roll out the learner and ask the expert to label visited states", correct: true, explanation: "This trains the policy on the state distribution it actually visits." },
+          { text: "Train the policy to maximize a reward shaped by the expert", correct: false, explanation: "DAgger is supervised imitation without reward optimization." }
+        ]
+      },
+      {
+        quizId: "8a",
+        quizName: "Quiz 8a: Imitation Learning & Offline RL",
+        id: "q8a_6",
+        question: "DAgger reduces compounding error from O(T^2) to:",
+        options: [
+          { text: "O(1)", correct: false, explanation: "Errors still accumulate over the episode horizon." },
+          { text: "O(log T)", correct: false, explanation: "DAgger's theoretical bound is linear in horizon T." },
+          { text: "O(T)", correct: true, explanation: "By sampling states from the learner's own rollout distribution, error growth drops from quadratic to linear \\(O(T)\\)." }
+        ]
+      },
+      {
+        quizId: "8a",
+        quizName: "Quiz 8a: Imitation Learning & Offline RL",
+        id: "q8a_7",
+        question: "What is the core difficulty of offline RL compared to standard off-policy RL?",
+        options: [
+          { text: "Cannot use neural network function approximators", correct: false, explanation: "Offline RL regularly uses neural networks." },
+          { text: "Requires a perfect world model to evaluate new actions", correct: false, explanation: "Many offline algorithms are model-free." },
+          { text: "Reward functions are unavailable in offline settings", correct: false, explanation: "Offline datasets include rewards." },
+          { text: "The policy may select unsupported actions, causing unreliable Q-estimates", correct: true, explanation: "Bootstrapping on out-of-distribution (OOD) actions triggers severe extrapolation error." }
+        ]
+      },
+      {
+        quizId: "8a",
+        quizName: "Quiz 8a: Imitation Learning & Offline RL",
+        id: "q8a_8",
+        question: "Which of the following are common approaches for offline RL?",
+        options: [
+          { text: "Behavior regularization", correct: true, explanation: "Penalizes the policy when it diverges from the behavior dataset distribution." },
+          { text: "Conservative value estimation", correct: true, explanation: "Pushes down value estimates for unsupported or OOD actions." },
+          { text: "Model-based planning", correct: false, explanation: "Generic planning alone does not resolve the data support challenge." },
+          { text: "Reward shaping", correct: false, explanation: "Reward shaping does not solve OOD action overestimation." },
+          { text: "Sequence modeling", correct: true, explanation: "Decision Transformer-style architectures formulate offline RL as conditional autoregressive modeling." }
+        ]
+      },
+      {
+        quizId: "8a",
+        quizName: "Quiz 8a: Imitation Learning & Offline RL",
+        id: "q8a_9",
+        question: "What is the key idea of Conservative Q-Learning (CQL)?",
+        options: [
+          { text: "Clip Q-values at a fixed upper bound", correct: false, explanation: "CQL uses an explicit optimization penalty rather than hard clipping." },
+          { text: "Push down Q-values for OOD actions; keep them accurate on dataset actions", correct: true, explanation: "It penalizes Q-values for unsupported actions while maximizing values for dataset actions." },
+          { text: "Restrict the policy to dataset actions via a hard support constraint", correct: false, explanation: "CQL applies soft regularized value bounds." },
+          { text: "Use a world model to simulate OOD actions before selecting them", correct: false, explanation: "CQL is a model-free value learning algorithm." }
+        ]
+      },
+      {
+        quizId: "8a",
+        quizName: "Quiz 8a: Imitation Learning & Offline RL",
+        id: "q8a_10",
+        question: "How does Implicit Q-Learning (IQL) avoid querying out-of-distribution actions?",
+        options: [
+          { text: "A safety classifier filters OOD actions before evaluation", correct: false, explanation: "IQL does not train or query a separate action classifier." },
+          { text: "Conservative clipping of the Bellman target", correct: false, explanation: "That is not IQL's core mechanism." },
+          { text: "Expectile regression estimates a soft maximum over dataset actions only", correct: true, explanation: "IQL fits state values using expectile regression over actions present in the dataset." }
+        ]
+      },
+
+      // QUIZ 8b
+      {
+        quizId: "8b",
+        quizName: "Quiz 8b: Core Challenges",
+        id: "q8b_1",
+        question: "Why is exploration hard in sparse-reward environments?",
+        options: [
+          { text: "All rewards are always zero", correct: false, explanation: "Sparse reward means informative signals are extremely rare, not permanently zero everywhere." },
+          { text: "Action space grows exponentially", correct: false, explanation: "Action space size is independent of reward sparsity." },
+          { text: "Useful feedback is rare", correct: true, explanation: "The agent gets no informative learning signal until it randomly hits the goal state." },
+          { text: "Fails with function approximation", correct: false, explanation: "Sparse reward issues persist even in tabular representations." }
+        ]
+      },
+      {
+        quizId: "8b",
+        quizName: "Quiz 8b: Core Challenges",
+        id: "q8b_2",
+        question: "What are the main advantages of directed exploration over undirected methods?",
+        options: [
+          { text: "It visits every state exactly once", correct: false, explanation: "Directed exploration does not enforce single-visit sweeps." },
+          { text: "It targets states based on uncertainty, novelty, or surprise", correct: true, explanation: "It steers exploration toward unfamiliar or uncertain areas using intrinsic signals." },
+          { text: "It always achieves higher reward than undirected methods", correct: false, explanation: "No exploration technique guarantees superior performance on every task." },
+          { text: "It eliminates the need to tune exploration hyperparameters", correct: false, explanation: "Intrinsic reward weights and curiosity terms require hyperparameter tuning." }
+        ]
+      },
+      {
+        quizId: "8b",
+        quizName: "Quiz 8b: Core Challenges",
+        id: "q8b_3",
+        question: "Which of the following are directed exploration methods?",
+        options: [
+          { text: "epsilon-greedy", correct: false, explanation: "Epsilon-greedy is an undirected exploration heuristic." },
+          { text: "count-based exploration", correct: true, explanation: "Directs the agent toward states with low historical visitation counts." },
+          { text: "entropy penalty", correct: false, explanation: "An entropy penalty reduces policy entropy; it is not a directed exploration strategy." },
+          { text: "random network distillation", correct: true, explanation: "RND uses prediction error on a fixed random neural target as an intrinsic novelty signal." },
+          { text: "bootstrapped ensembles", correct: true, explanation: "Ensembles drive deep exploration through epistemic model uncertainty." }
+        ]
+      },
+      {
+        quizId: "8b",
+        quizName: "Quiz 8b: Core Challenges",
+        id: "q8b_4",
+        question: "Which of the methods requires a dynamic model?",
+        options: [
+          { text: "Noisy Networks", correct: false, explanation: "Noisy Nets perturb parameter weights without dynamics modeling." },
+          { text: "Count-based exploration", correct: false, explanation: "Counts track visitation statistics without dynamics prediction." },
+          { text: "Intrinsic Curiosity Module", correct: true, explanation: "ICM trains a forward dynamics model and uses prediction error in feature space as reward." },
+          { text: "Random Distillation Networks", correct: false, explanation: "RND predicts random fixed embeddings, not environment forward transitions." },
+          { text: "Disagreement-based exploration", correct: true, explanation: "Measures variance across an ensemble of forward dynamics models." }
+        ]
+      },
+      {
+        quizId: "8b",
+        quizName: "Quiz 8b: Core Challenges",
+        id: "q8b_5",
+        question: "What are root causes of hard credit assignment?",
+        options: [
+          { text: "Breadth (many equivalent paths)", correct: true, explanation: "Multiple paths to a goal make it difficult to determine which specific decisions contributed." },
+          { text: "Density (sparse rewards)", correct: true, explanation: "Sparse rewards offer minimal feedback regarding intermediate actions." },
+          { text: "Depth (large temporal distance)", correct: true, explanation: "A wide delay between early critical actions and later outcomes weakens attribution." },
+          { text: "Entropy (stochastic policy)", correct: false, explanation: "Policy entropy is not one of the primary root causes." },
+          { text: "Gradient (vanishing gradients)", correct: false, explanation: "This is an optimization difficulty, not a credit assignment taxonomy factor." }
+        ]
+      },
+      {
+        quizId: "8b",
+        quizName: "Quiz 8b: Core Challenges",
+        id: "q8b_6",
+        question: "What are the key insights of RUDDER'S reward redistribution?",
+        options: [
+          { text: "Add random actions", correct: false, explanation: "RUDDER does not add noise to actions." },
+          { text: "Addresses breadth", correct: false, explanation: "RUDDER targets depth (temporal delay), not branching paths." },
+          { text: "Addresses density", correct: false, explanation: "Its main design focus is long-delayed returns." },
+          { text: "Addresses depth", correct: true, explanation: "Redistribution resolves long temporal distance between actions and returns." },
+          { text: "Discards uninformative transitions", correct: false, explanation: "It retains all transitions and redistributes credit." },
+          { text: "Identify key events", correct: true, explanation: "Identifies early decisive transitions that determined the final outcome." },
+          { text: "Move reward backward", correct: true, explanation: "Shifts return signals backward directly to causal events." },
+          { text: "Use return prediction", correct: true, explanation: "Uses an LSTM/transformer to predict return and decompose contributions." }
+        ]
+      },
+      {
+        quizId: "8b",
+        quizName: "Quiz 8b: Core Challenges",
+        id: "q8b_7",
+        question: "Which are true about Hindsight Experience Replay (HER)?",
+        options: [
+          { text: "Addresses breadth", correct: false, explanation: "HER is not specifically designed for path breadth." },
+          { text: "Addresses density", correct: true, explanation: "Converts failed sparse-reward episodes into successful ones by goal relabeling." },
+          { text: "Addresses depth", correct: false, explanation: "Delayed credit assignment is not HER's direct target." },
+          { text: "Needs a goal-conditioned MDP", correct: true, explanation: "Requires policies and value functions conditioned on an explicit goal: \\(\\pi(a|s,g)\\)." },
+          { text: "Relabels failures as successes for a different goal", correct: true, explanation: "Substitutes the original goal with the state actually reached during rollout." }
+        ]
+      },
+      {
+        quizId: "8b",
+        quizName: "Quiz 8b: Core Challenges",
+        id: "q8b_8",
+        question: "What are the desiderata for learned state representations?",
+        options: [
+          { text: "Completeness (preserve all info)", correct: false, explanation: "Representations should discard task-irrelevant distractors, not keep everything." },
+          { text: "Continuity (nearby -> nearby in latent)", correct: true, explanation: "Semantically close states should map to close latent vectors." },
+          { text: "Linearity (globally linear latent)", correct: false, explanation: "Global linearity is generally impractical in complex environments." },
+          { text: "Sparsity (few active dimensions)", correct: true, explanation: "Sparse activations encourage modular, disentangled representations." },
+          { text: "Structure (task-relevant latent)", correct: true, explanation: "Preserves geometric or causal relationships relevant to policy control." }
+        ]
+      },
+      {
+        quizId: "8b",
+        quizName: "Quiz 8b: Core Challenges",
+        id: "q8b_9",
+        question: "Bisimulation groups states by which criterion?",
+        options: [
+          { text: "Similar Q-values under current policy", correct: false, explanation: "Bisimulation is an environment equivalence relation, not policy-specific value." },
+          { text: "Similar rewards and dynamics", correct: true, explanation: "States are bisimilar if they produce identical immediate rewards and transition distributions over bisimulation equivalence classes." },
+          { text: "Temporal proximity in trajectory", correct: false, explanation: "Being visited consecutively does not imply functional equivalence." },
+          { text: "Visual similarity", correct: false, explanation: "States can look completely different yet remain bisimilar (and vice versa)." }
+        ]
+      },
+      {
+        quizId: "8b",
+        quizName: "Quiz 8b: Core Challenges",
+        id: "q8b_10",
+        question: "What statements are true about auxiliary task-based SRL (State Representation Learning)?",
+        options: [
+          { text: "Always aligns with the control objective", correct: false, explanation: "Auxiliary losses can sometimes optimize for features useless for the main task." },
+          { text: "Helps under sparse extrinsic reward", correct: true, explanation: "Self-supervised auxiliary signals shape representations even when external reward is absent." },
+          { text: "Only works with image observations", correct: false, explanation: "Auxiliary objectives can be applied to any high-dimensional or multimodal inputs." },
+          { text: "Reconstruction may retain irrelevant details", correct: true, explanation: "Pixel reconstruction forces autoencoders to model background noise that has no effect on control." }
+        ]
+      },
+
+      // QUIZ 9
+      {
+        quizId: "9",
+        quizName: "Quiz 9: IRL & Preference-Based RL",
+        id: "q9_1",
+        question: "What is the goal of inverse RL?",
+        options: [
+          { text: "Avoid all exploration", correct: false, explanation: "IRL is about recovering objectives, not avoiding exploration." },
+          { text: "Explain demonstrations", correct: true, explanation: "Find a reward function that rationalizes the observed expert behavior." },
+          { text: "Infer the reward function", correct: true, explanation: "Extract the underlying reward signal from demonstrated behavior." },
+          { text: "Learn the objective", correct: true, explanation: "Uncover what objective the demonstrating agent was optimizing." },
+          { text: "Maximize a given reward", correct: false, explanation: "That is forward RL; IRL discovers the reward." },
+          { text: "Mimic expert actions", correct: false, explanation: "Direct action imitation without reward recovery is Behavioral Cloning." }
+        ]
+      },
+      {
+        quizId: "9",
+        quizName: "Quiz 9: IRL & Preference-Based RL",
+        id: "q9_2",
+        question: "Why can IRL be useful compared to behavioral cloning?",
+        options: [
+          { text: "Can transfer better to new situations", correct: true, explanation: "A learned reward function can be optimized in new environment layouts or dynamics." },
+          { text: "Learns what matters", correct: true, explanation: "Distinguishes between key task objectives and arbitrary incidental actions." },
+          { text: "Needs no data", correct: false, explanation: "IRL still requires demonstration datasets." },
+          { text: "Removes reward ambiguity", correct: false, explanation: "IRL suffers from inherent reward ambiguity." }
+        ]
+      },
+      {
+        quizId: "9",
+        quizName: "Quiz 9: IRL & Preference-Based RL",
+        id: "q9_3",
+        question: "What is reward ambiguity in IRL?",
+        options: [
+          { text: "A constant reward always technically fits", correct: true, explanation: "A constant zero reward makes all possible trajectories equally optimal." },
+          { text: "The agent cannot distinguish good states from bad ones", correct: false, explanation: "This describes learning failure, not the mathematical definition of ambiguity." },
+          { text: "Many different reward functions can explain the same expert behavior", correct: true, explanation: "Multiple distinct reward functions can induce the exact same optimal policy." },
+          { text: "The reward function changes over time during training", correct: false, explanation: "Ambiguity refers to the non-uniqueness of rewards, not non-stationarity." }
+        ]
+      },
+      {
+        quizId: "9",
+        quizName: "Quiz 9: IRL & Preference-Based RL",
+        id: "q9_4",
+        question: "In linear IRL, what do features and weights represent?",
+        options: [
+          { text: "Features describe events", correct: true, explanation: "Feature vectors encode properties of states, events, or transitions." },
+          { text: "Features describe policies", correct: false, explanation: "Policies generate behavior; features describe states or events." },
+          { text: "Weights encode actions", correct: true, explanation: "In this quiz's formulation: weights determine which feature-linked behaviors are rewarded/preferred." },
+          { text: "Weights encode importance", correct: false, explanation: "Not marked as the target answer in the source test wording." }
+        ]
+      },
+      {
+        quizId: "9",
+        quizName: "Quiz 9: IRL & Preference-Based RL",
+        id: "q9_5",
+        question: "Which statements about Maximum Margin IRL are true?",
+        options: [
+          { text: "It assumes the reward is a linear combination of hand-crafted state features", correct: true, explanation: "Classic max-margin IRL expresses reward as \\(R(s) = \\mathbf{w}^T \\mathbf{\\phi}(s)\\)." },
+          { text: "It finds a reward where the expert's return exceeds all other policies by the largest possible margin", correct: true, explanation: "Maximizes the performance gap between the expert policy and candidate alternatives." },
+          { text: "It is inspired by the max-margin principle from SVMs", correct: true, explanation: "Applies quadratic programming similar to support vector machine margins." },
+          { text: "It maximizes the entropy of the expert's trajectory distribution", correct: false, explanation: "That defines Maximum Entropy IRL, not Max-Margin IRL." },
+          { text: "It uses a discriminator to distinguish the agent's behavior from the expert's", correct: false, explanation: "That is the GAIL adversarial framework." }
+        ]
+      },
+      {
+        quizId: "9",
+        quizName: "Quiz 9: IRL & Preference-Based RL",
+        id: "q9_6",
+        question: "What does Maximum Entropy IRL assume about the expert?",
+        options: [
+          { text: "The expert always takes the perfectly optimal action", correct: false, explanation: "MaxEnt accommodates noisy, boundedly rational decision-makers." },
+          { text: "The expert is noisily optimal: higher-reward trajectories are more likely", correct: true, explanation: "The expert selects trajectories probabilistically according to their exponentiated reward." },
+          { text: "The reward function must be a linear combination of hand-crafted features", correct: false, explanation: "The Boltzmann trajectory distribution is independent of whether features are linear or neural." },
+          { text: "Trajectories with higher reward have exponentially higher probability", correct: true, explanation: "\\(P(\\tau) \\propto \\exp(R(\\tau))\\)." }
+        ]
+      },
+      {
+        quizId: "9",
+        quizName: "Quiz 9: IRL & Preference-Based RL",
+        id: "q9_7",
+        question: "Which statements about GAIL are true?",
+        options: [
+          { text: "It can only handle tasks with discrete action spaces", correct: false, explanation: "GAIL works directly with continuous actions using policy gradient backbones." },
+          { text: "It directly learns a policy without explicitly recovering a reward function", correct: true, explanation: "Bypasses the full IRL reward extraction step by using an adversarial minimax game directly on policy." },
+          { text: "It learns a model of the environment's transition dynamics", correct: false, explanation: "Standard GAIL is model-free." },
+          { text: "It uses a discriminator to distinguish the agent's behavior from the expert's", correct: true, explanation: "A discriminator outputs probabilities that provide reward signals to an RL actor." }
+        ]
+      },
+      {
+        quizId: "9",
+        quizName: "Quiz 9: IRL & Preference-Based RL",
+        id: "q9_8",
+        question: "In preference-based RL, what does the human annotator provide?",
+        options: [
+          { text: "Scalar reward values for every individual state-action pair", correct: false, explanation: "Human feedback does not require evaluating exact numerical values for every single step." },
+          { text: "Comparisons between pairs of short trajectory segments", correct: true, explanation: "The teacher marks which of two demonstrated trajectories is preferred." }
+        ]
+      },
+      {
+        quizId: "9",
+        quizName: "Quiz 9: IRL & Preference-Based RL",
+        id: "q9_9",
+        question: "Which statements about preference-based RL are true?",
+        options: [
+          { text: "Humans can compare two behaviors more easily than assigning a scalar number", correct: true, explanation: "Relative pairwise rankings are cognitively simpler and less noisy than exact absolute ratings." },
+          { text: "Human preferences can be noisy or internally inconsistent", correct: true, explanation: "Models must handle probabilistic human preference noise." },
+          { text: "It eliminates the exploration-exploitation tradeoff", correct: false, explanation: "The policy still needs to explore the environment to discover novel trajectories." },
+          { text: "It works even when the true objective is hard to specify mathematically", correct: true, explanation: "Enables optimization for complex tasks without explicit analytical reward formulas." }
+        ]
+      },
+      {
+        quizId: "9",
+        quizName: "Quiz 9: IRL & Preference-Based RL",
+        id: "q9_10",
+        question: "What does the Bradley-Terry model do in preference-based RL?",
+        options: [
+          { text: "It describes probability that a human prefers one trajectory segment over another", correct: true, explanation: "Models the probability that trajectory \\(\\tau_1\\) is preferred to \\(\\tau_2\\) as \\(\\sigma(R(\\tau_1) - R(\\tau_2))\\)." },
+          { text: "It describes probability of transitioning between two states under a policy", correct: false, explanation: "That is environment transition dynamics." },
+          { text: "It combines multiple reward signals from different sources", correct: false, explanation: "Bradley-Terry is a pairwise ranking probability model." },
+          { text: "It converts reward differences into preference probabilities", correct: true, explanation: "The sigmoid of the return difference directly determines preference likelihood." },
+          { text: "It provides a principled loss function for training the reward model", correct: true, explanation: "Cross-entropy loss on the predicted preference probabilities is used to optimize the reward network." }
+        ]
+      },
+
+      // QUIZ 10
+      {
+        quizId: "10",
+        quizName: "Quiz 10: Model-Based RL & MCTS",
+        id: "q10_1",
+        question: "Which of the following are things that a model of the environment enables?",
+        options: [
+          { text: "Eliminating the need for a reward signal altogether", correct: false, explanation: "A model predicts transitions and rewards; it cannot remove the objective of the task." },
+          { text: "Generating synthetic experience to supplement real transitions", correct: true, explanation: "Simulated rollouts generated by the model can train value or policy functions (e.g., Dyna-Q)." },
+          { text: "Planning over action sequences by simulating future transitions", correct: true, explanation: "Simulating paths into the future allows evaluating actions before executing them." },
+          { text: "Removing the need to represent a value function", correct: false, explanation: "Model-based algorithms often still incorporate value functions for leaf evaluation or guidance." },
+          { text: "Uncertainty-guided exploration by querying regions where the model is uncertain", correct: true, explanation: "Model epistemic uncertainty identifies unvisited state regions to guide exploration." }
+        ]
+      },
+      {
+        quizId: "10",
+        quizName: "Quiz 10: Model-Based RL & MCTS",
+        id: "q10_2",
+        question: "Why is full dynamic programming impractical for large problems?",
+        options: [
+          { text: "It converges to a suboptimal policy when rewards are sparse", correct: false, explanation: "DP converges to the optimal policy given an exact model regardless of sparsity." },
+          { text: "It requires on-policy data collection at every iteration", correct: false, explanation: "DP does not require sample rollouts; it computes full expectations using the model." },
+          { text: "It requires updates over all states in the state space", correct: true, explanation: "Full Bellman backups require iterating across the entire state space, which is impossible in large or continuous problems (curse of dimensionality)." }
+        ]
+      },
+      {
+        quizId: "10",
+        quizName: "Quiz 10: Model-Based RL & MCTS",
+        id: "q10_3",
+        question: "Which of the following are phases of the Monte Carlo Tree Search (MCTS) algorithm?",
+        options: [
+          { text: "Backpropagation: update visit counts and value estimates along the path to the root", correct: true, explanation: "Simulation returns are propagated backward along the traversed trajectory to update node statistics." },
+          { text: "Minimax expansion: enumerate all children of every node before selecting", correct: false, explanation: "MCTS expands selectively rather than enumerating full search trees." },
+          { text: "Policy gradient update: adjust network weights using leaf returns", correct: false, explanation: "This is a neural learning update, not one of the 4 canonical MCTS phases." },
+          { text: "Pruning: remove low-value branches to reduce tree size", correct: false, explanation: "Tree pruning is not one of the four foundational steps." },
+          { text: "Selection: traverse the tree from root to a leaf using the tree policy", correct: true, explanation: "Selects actions within the tree using an exploration policy such as UCT." },
+          { text: "Simulation: run a rollout from the selected leaf to estimate its value", correct: true, explanation: "Runs a default rollout policy to terminal state or evaluation depth." }
+        ]
+      },
+      {
+        quizId: "10",
+        quizName: "Quiz 10: Model-Based RL & MCTS",
+        id: "q10_4",
+        question: "Which statements about the UCT tree policy used in MCTS are correct?",
+        options: [
+          { text: "The exploration bonus grows for actions that have been visited fewer times", correct: true, explanation: "The UCB exploration term \\(\\sqrt{\\ln(N) / n_i}\\) increases when an action visit count \\(n_i\\) is small." },
+          { text: "UCT always selects the action with the highest current Q-value", correct: false, explanation: "UCT balances expected value against an explicit exploration bonus." },
+          { text: "UCT requires a learned value network to function", correct: false, explanation: "Standard UCT uses random or heuristic rollouts without any neural networks." }
+        ]
+      },
+      {
+        quizId: "10",
+        quizName: "Quiz 10: Model-Based RL & MCTS",
+        id: "q10_5",
+        question: "Which statements about MCTS and its leaf evaluation are correct?",
+        options: [
+          { text: "MCTS builds the search tree symmetrically, visiting every branch equally", correct: false, explanation: "MCTS allocates search effort asymmetrically toward more promising branches." },
+          { text: "MCTS is an anytime algorithm: more simulations improve the decision quality", correct: true, explanation: "The search can be stopped at any time budget and returns the best move evaluated so far." },
+          { text: "MCTS only needs a queryable simulator, not an explicit transition table", correct: true, explanation: "It only requires black-box sample generation of next states and rewards." },
+          { text: "MCTS requires the reward function to be differentiable", correct: false, explanation: "MCTS is sampling-based and does not compute reward gradients." }
+        ]
+      },
+      {
+        quizId: "10",
+        quizName: "Quiz 10: Model-Based RL & MCTS",
+        id: "q10_6",
+        question: "Which components are part of AlphaGo?",
+        options: [
+          { text: "A fast rollout policy used to simulate games from leaf states", correct: true, explanation: "AlphaGo used a lightweight rollout policy to run fast simulations to terminal positions." },
+          { text: "A large policy network trained first by supervised learning on human expert moves", correct: true, explanation: "The policy network was initialized by predicting moves from historical human games." },
+          { text: "A separate opponent network that is trained by adversarial self-play only", correct: false, explanation: "AlphaGo used self-play against earlier versions of itself, not an independent opponent network." },
+          { text: "A single network that jointly predicts both policy and value", correct: false, explanation: "Original AlphaGo had separate policy and value networks; the unified two-headed network was introduced in AlphaZero." },
+          { text: "A reward shaping module that provides dense feedback at each step", correct: false, explanation: "Go relies strictly on terminal outcome rewards (+1 for win, -1 for loss)." },
+          { text: "A value network trained from self-play game outcomes", correct: true, explanation: "A value network evaluated positions directly from self-play states." }
+        ]
+      },
+      {
+        quizId: "10",
+        quizName: "Quiz 10: Model-Based RL & MCTS",
+        id: "q10_7",
+        question: "Which statements about the AlphaZero self-play training loop are correct?",
+        options: [
+          { text: "MCTS is run at every state during self-play to generate an improved policy target", correct: true, explanation: "Search probabilities based on visit counts form the target for the policy head." },
+          { text: "MCTS acts as a teacher: it produces a search policy that is stronger than the raw network policy", correct: true, explanation: "Tree search serves as policy improvement, generating superior move distributions than raw network outputs." },
+          { text: "Self-play requires a fixed, pre-trained opponent to generate training data", correct: false, explanation: "AlphaZero plays exclusively against the current iteration of itself." },
+          { text: "The final game outcome is used as the value training target", correct: true, explanation: "The terminal winner (+1 / -1) serves as the ground-truth regression target for position values." }
+        ]
+      },
+      {
+        quizId: "10",
+        quizName: "Quiz 10: Model-Based RL & MCTS",
+        id: "q10_8",
+        question: "Which statements about trajectory optimisation for continuous control are correct?",
+        options: [
+          { text: "It is restricted to deterministic dynamics models", correct: false, explanation: "Trajectory optimization can be applied using stochastic models." },
+          { text: "It plans by directly searching over action sequences rather than tree nodes", correct: true, explanation: "Optimizers plan directly in the continuous action parameter space." },
+          { text: "It requires access to the analytic gradient of the reward function", correct: false, explanation: "Sampling-based optimizers like CEM or MPPI do not require gradients." },
+          { text: "It requires only a queryable model, not an explicit transition table", correct: true, explanation: "Generating forward sample rollouts from the simulator is sufficient." }
+        ]
+      },
+      {
+        quizId: "10",
+        quizName: "Quiz 10: Model-Based RL & MCTS",
+        id: "q10_9",
+        question: "Which statements about Model Predictive Control (MPC) are correct?",
+        options: [
+          { text: "MPC avoids model errors entirely by using the true environment dynamics", correct: false, explanation: "MPC typically plans using an imperfect approximate model." },
+          { text: "MPC commits to the full planned trajectory before taking any action", correct: false, explanation: "MPC executes only the very first action of the plan and then replans." },
+          { text: "MPC naturally handles changing environments by incorporating the new observed state", correct: true, explanation: "Receding-horizon replanning grounds the plan at every time step with the newly observed real state." },
+          { text: "MPC plans over a finite horizon but executes only the first action", correct: true, explanation: "After taking the first action, it shifts the horizon forward and repeats optimization." }
+        ]
+      },
+      {
+        quizId: "10",
+        quizName: "Quiz 10: Model-Based RL & MCTS",
+        id: "q10_10",
+        question: "Which statements about the Cross-Entropy Method (CEM) for trajectory optimisation are correct?",
+        options: [
+          { text: "CEM is trivially parallelisable because candidate sequences are evaluated independently", correct: true, explanation: "Candidate action trajectories can be sampled and simulated in parallel batches." },
+          { text: "CEM iteratively refits its sampling distribution to the highest-return (elite) sequences", correct: true, explanation: "Elite candidate trajectories are selected to update the mean and covariance for the next sampling step." },
+          { text: "CEM requires computing gradients through the dynamics model", correct: false, explanation: "CEM is a derivative-free stochastic optimization technique." },
+          { text: "CEM uses a deterministic beam-search procedure without any random sampling", correct: false, explanation: "CEM is inherently stochastic, sampling candidate trajectories from Gaussian distributions." }
+        ]
+      }
+    ];
+
+    let currentQuestions = [];
+    let currentIndex = 0;
+    let userSelections = {}; 
+    let submittedState = {}; 
+    let missedQuestionIds = new Set();
+    let currentTab = "all";
+
+    try {
+      const savedMissed = localStorage.getItem("rl_missed_questions");
+      if (savedMissed) {
+        missedQuestionIds = new Set(JSON.parse(savedMissed));
+      }
+    } catch(e) {}
+
+    function saveMissedToStorage() {
+      try {
+        localStorage.setItem("rl_missed_questions", JSON.stringify([...missedQuestionIds]));
+      } catch(e) {}
+    }
+
+    function initTabs() {
+      const tabs = [
+        { id: "all", label: "All Quizzes (104 Qs)" },
+        { id: "0", label: "Quiz 0: Foundations" },
+        { id: "1", label: "Quiz 1: Bandits" },
+        { id: "2", label: "Quiz 2/3: Value Methods" },
+        { id: "4", label: "Quiz 4: Approx & DQN" },
+        { id: "5", label: "Quiz 5: Policy Gradients" },
+        { id: "7", label: "Quiz 7: TRPO/PPO/SAC" },
+        { id: "8a", label: "Quiz 8a: IL & Offline" },
+        { id: "8b", label: "Quiz 8b: Challenges" },
+        { id: "9", label: "Quiz 9: IRL & Preferences" },
+        { id: "10", label: "Quiz 10: Model-Based" }
+      ];
+
+      const navContainer = document.getElementById("nav-tabs");
+      navContainer.innerHTML = "";
+      tabs.forEach(tab => {
+        const btn = document.createElement("button");
+        btn.className = `btn-tab ${tab.id === currentTab ? "active" : ""}`;
+        btn.textContent = tab.label;
+        btn.onclick = () => {
+          currentTab = tab.id;
+          document.querySelectorAll(".btn-tab").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          loadQuizSet();
+        };
+        navContainer.appendChild(btn);
+      });
+    }
+
+    function loadQuizSet(onlyMissed = false) {
+      if (onlyMissed) {
+        currentQuestions = QUIZ_DATA.filter(q => missedQuestionIds.has(q.id));
+        if (currentQuestions.length === 0) {
+          alert("No missed questions saved. Great job!");
+          currentQuestions = [...QUIZ_DATA];
+        }
+      } else if (currentTab === "all") {
+        currentQuestions = [...QUIZ_DATA];
+      } else {
+        currentQuestions = QUIZ_DATA.filter(q => q.quizId === currentTab);
+      }
+
+      if (document.getElementById("shuffle-toggle").checked) {
+        currentQuestions.sort(() => Math.random() - 0.5);
+      }
+
+      currentIndex = 0;
+      userSelections = {};
+      submittedState = {};
+      renderCard();
+    }
+
+    function isSingleChoice(question) {
+      const correctCount = question.options.filter(o => o.correct).length;
+      return correctCount === 1;
+    }
+
+    function toggleOption(optIdx) {
+      const q = currentQuestions[currentIndex];
+      const single = isSingleChoice(q);
+      
+      if (!userSelections[currentIndex]) {
+        userSelections[currentIndex] = new Set();
+      }
+
+      if (single) {
+        userSelections[currentIndex].clear();
+        userSelections[currentIndex].add(optIdx);
+      } else {
+        if (userSelections[currentIndex].has(optIdx)) {
+          userSelections[currentIndex].delete(optIdx);
+        } else {
+          userSelections[currentIndex].add(optIdx);
+        }
+      }
+      renderCard();
+    }
+
+    function checkAnswer() {
+      submittedState[currentIndex] = true;
+      const q = currentQuestions[currentIndex];
+      const chosen = userSelections[currentIndex] || new Set();
+      
+      let allCorrect = true;
+      q.options.forEach((opt, idx) => {
+        const isSelected = chosen.has(idx);
+        if ((opt.correct && !isSelected) || (!opt.correct && isSelected)) {
+          allCorrect = false;
+        }
+      });
+
+      if (!allCorrect) {
+        missedQuestionIds.add(q.id);
+      } else {
+        missedQuestionIds.delete(q.id);
+      }
+      saveMissedToStorage();
+      renderCard();
+    }
+
+    function nextQuestion() {
+      if (currentIndex < currentQuestions.length - 1) {
+        currentIndex++;
+        renderCard();
+      } else {
+        renderResults();
+      }
+    }
+
+    function prevQuestion() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        renderCard();
+      }
+    }
+
+    function renderCard() {
+      const container = document.getElementById("quiz-container");
+      if (currentQuestions.length === 0) {
+        container.innerHTML = `<div class="quiz-card"><p>No questions found in this category.</p></div>`;
+        return;
+      }
+
+      const q = currentQuestions[currentIndex];
+      const single = isSingleChoice(q);
+      const isSubmitted = !!submittedState[currentIndex];
+      const examMode = document.getElementById("exam-mode-toggle").checked;
+      const chosen = userSelections[currentIndex] || new Set();
+
+      const progress = ((currentIndex + 1) / currentQuestions.length) * 100;
+
+      let optionsHtml = q.options.map((opt, idx) => {
+        const isSelected = chosen.has(idx);
+        let statusClass = isSelected ? "selected" : "";
+
+        if (isSubmitted && !examMode) {
+          if (isSelected && opt.correct) {
+            statusClass = "selected correct";
+          } else if (isSelected && !opt.correct) {
+            statusClass = "selected wrong";
+          } else if (!isSelected && opt.correct) {
+            statusClass = "missed";
+          }
+        }
+
+        return `
+          <div class="option-item ${single ? "single" : ""} ${statusClass}" onclick="${isSubmitted && !examMode ? '' : `toggleOption(${idx})`}">
+            <div class="option-box"></div>
+            <div class="option-content">
+              <div>${opt.text}</div>
+              ${isSubmitted && !examMode ? `<div class="option-explanation">${opt.explanation}</div>` : ""}
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      container.innerHTML = `
+        <div class="quiz-card">
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" style="width: ${progress}%"></div>
+          </div>
+          <div class="card-meta">
+            <span class="badge-module">${q.quizName}</span>
+            <span class="badge-type">${single ? "Single Choice" : "Select All That Apply"}</span>
+          </div>
+          <div class="question-title">
+            <strong>Q${currentIndex + 1}/${currentQuestions.length}:</strong> ${q.question}
+          </div>
+          <div class="options-list">
+            ${optionsHtml}
+          </div>
+          <div class="card-footer">
+            <button class="btn-secondary" onclick="prevQuestion()" ${currentIndex === 0 ? "disabled" : ""}>Previous</button>
+            <div>
+              ${(!isSubmitted && !examMode) ? `
+                <button class="btn-action" onclick="checkAnswer()" ${chosen.size === 0 ? "disabled" : ""}>Submit Answer</button>
+              ` : `
+                <button class="btn-action" onclick="nextQuestion()">${currentIndex === currentQuestions.length - 1 ? "Complete Quiz" : "Next"}</button>
+              `}
+            </div>
+          </div>
+        </div>
+      `;
+
+      if (window.renderMathInElement) {
+        renderMathInElement(container, {
+          delimiters: [
+            {left: "$$", right: "$$", display: true},
+            {left: "\\(", right: "\\)", display: false}
+          ],
+          throwOnError: false
+        });
+      }
+    }
+
+    function renderResults() {
+      const container = document.getElementById("quiz-container");
+      let totalQuestions = currentQuestions.length;
+      let correctCount = 0;
+
+      currentQuestions.forEach((q, idx) => {
+        const chosen = userSelections[idx] || new Set();
+        let pass = true;
+        q.options.forEach((opt, oIdx) => {
+          const selected = chosen.has(oIdx);
+          if ((opt.correct && !selected) || (!opt.correct && selected)) {
+            pass = false;
+          }
+        });
+        if (pass) correctCount++;
+      });
+
+      const percentage = Math.round((correctCount / totalQuestions) * 100);
+
+      container.innerHTML = `
+        <div class="result-summary-card">
+          <h2>Quiz Completed</h2>
+          <div class="result-score">${percentage}%</div>
+          <p style="color: var(--text-muted);">You got <strong>${correctCount}</strong> out of <strong>${totalQuestions}</strong> questions correct.</p>
+          <div class="result-actions">
+            <button class="btn-action" onclick="loadQuizSet()">Restart Quiz</button>
+            <button class="btn-secondary" onclick="loadQuizSet(true)">Practice Missed Questions (${missedQuestionIds.size})</button>
+          </div>
+        </div>
+      `;
+    }
+
+    document.getElementById("shuffle-toggle").addEventListener("change", () => loadQuizSet());
+    document.getElementById("exam-mode-toggle").addEventListener("change", () => renderCard());
+    document.getElementById("btn-review-missed").addEventListener("click", () => loadQuizSet(true));
+
+    initTabs();
+    loadQuizSet();
+  </script>
+</body>
+</html>
